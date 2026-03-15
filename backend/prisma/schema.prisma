@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int              @id @default(autoincrement())
+  email            String           @unique
+  name             String?
+  password         String?
+  phone            String?
+  userName         String?
+  role             Role             @default(MEMBER)
+  projects         Project[]      // Projects authored by this user
+  tasks            Task[]         // Tasks authored by this user
+  reports          Report[]
+  notiEvidence     NotiEvidence[]
+  notifications    Notification[]
+  assignedUser     User?             @relation("UserAssignment", fields: [assignedUserId], references: [id])
+  assignedUserId   Int?
+  inviters          Invitation[]     @relation("leader")
+  groups           Group[]
+  members          GroupMember[]
+  assignTracks     AssignTrack[]
+  modTracks        ModTracker[]
+  assignedUsers    User[]            @relation("UserAssignment")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime?         @updatedAt
+}
+
+model Project {
+  id                Int            @id @default(autoincrement())
+  name              String
+  summary           String?
+  startDate         DateTime?
+  duration          Int            @default(0)
+  endDate           DateTime?
+  author            User           @relation(fields: [authorId], references: [id])
+  authorId          Int
+  progress          Int            @default(0) // 0-100
+  tasks             Task[]
+  notifications     Notification[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  mode              String         @default("SINGLE")
+  assignTo          AssignTrack?    @relation("projectAssign",fields: [assignId],references: [id])
+  assignId          Int?            @unique  
+  modTrack          ModTracker?     @relation("projectModTrack",fields: [modifyProjectId],references: [id])
+  modifyProjectId   Int?            @unique
+  }
+
+model Task {
+  id            Int             @id @default(autoincrement())
+  name          String
+  startDate     DateTime?
+  endDate       DateTime?
+  duration      Int?           // in minutes or hours
+  delay         Int?
+  reason        String?
+  status        Status          @default(WAITING)
+  note          String?
+  progress      Int             @default(0)
+  notifications Notification[]
+  author        User            @relation(fields: [authorId], references: [id])
+  authorId      Int
+  project       Project         @relation(fields: [projectId], references: [id])
+  projectId     Int
+  notifiable    Boolean         @default(false)
+  assignTo      AssignTrack?    @relation("taskAssign",fields: [assignId],references: [id])
+  assignId      Int?            @unique 
+  modTrack      ModTracker?     @relation("taskModTrack",fields: [modifyTestId],references: [id])
+  modifyTestId  Int?            @unique
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime?       @updatedAt
+}
+model  ModTracker {
+     id                   Int             @id @default(autoincrement())
+     type                 String       
+     user                 User            @relation(fields:[updateUserId], references: [id])
+     updateUserId         Int             @unique    
+     task                 Task?           @relation("taskModTrack")
+     project              Project?        @relation("projectModTrack")
+     updatedAt            DateTime        @default(now()) 
+     createdAt            DateTime        @default(now())
+}
+model AssignTrack {
+    id               Int          @id @default(autoincrement())
+    task             Task?        @relation("taskAssign")
+    project          Project?     @relation("projectAssign")
+    assignUser       User         @relation(fields: [assignedUserId],references: [id])
+    assignedUserId   Int
+    assignedAt       DateTime     @default(now())
+    createdAt        DateTime     @default(now())
+    updatedAt        DateTime     @default(now())
+}
+
+model Report {
+  id          Int       @id @default(autoincrement())
+  name        String?
+  detail      String?
+  reportDate  DateTime  @default(now())
+  author      User      @relation(fields: [authorId], references: [id])
+  authorId    Int
+  createdAt   DateTime  @default(now())
+}
+
+model Notification {
+  id          Int             @id @default(autoincrement())
+  author      User            @relation(fields: [authorId], references: [id])
+  authorId    Int
+  header      String
+  body        String
+  read        Boolean         @default(false)
+  task        Task?           @relation(fields: [taskId], references: [id])
+  taskId      Int?
+  type        String          @default("ALERT")
+  project     Project?        @relation(fields: [projectId], references: [id])
+  projectId   Int?
+  request     JoinRequest?    @relation(fields: [requestId],references: [id])
+  requestId   Int?
+  isAction     Boolean        @default(false)
+  createdAt   DateTime        @default(now())
+}
+
+model Group {
+     id           Int       @id @default(autoincrement())
+     name         String
+     owner        User      @relation(fields:[ownerId],references: [id])
+     ownerId      Int
+     invitations  Invitation[]
+     members      GroupMember[]
+}
+
+model Invitation {
+  id         Int         @id @default(autoincrement())
+  token      String      @unique
+  leader     User        @relation("leader",fields:[leaderId],references: [id])
+  leaderId   Int   
+  expiresAt  DateTime
+  createdAt  DateTime    @default(now())
+  maxUses    Int?
+  usedCount  Int         @default(0)
+  group       Group      @relation(fields: [groupId], references: [id])
+  groupId     Int
+}
+
+model JoinRequest {
+  id            Int           @id @default(autoincrement())
+  groupId       Int
+  userId        Int
+  joinStatus    JoinStatus    @default(PENDING)  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  retryAt       DateTime? 
+  notification Notification[]
+  @@unique([groupId, userId])
+}
+
+
+model GroupMember {
+  id        Int      @id @default(autoincrement())
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  role      Role     @default(MEMBER) 
+  joinedAt  DateTime @default(now())
+
+  @@unique([groupId, userId]) // Prevents a user from joining the same group twice
+}
+
+model NotiEvidence {
+   id          Int       @id @default(autoincrement())
+   author      User      @relation(fields: [authorId], references: [id])
+   authorId    Int
+   notiToken   String 
+   createdAt   DateTime    @default(now())
+}
+
+enum ModType{
+  PROJECT
+  TASK
+  USER
+  GROUP
+}
+enum Role {
+  ADMIN
+  MEMBER
+  MANAGER
+}
+
+enum Status {
+  PROCESSING
+  WAITING
+  DONE
+}
+enum JoinStatus{
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+enum Mode {
+  SINGLE
+  TEAM
+}
+enum Type{
+  ALERT
+  REQUEST
+}

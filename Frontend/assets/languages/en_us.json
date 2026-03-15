@@ -1,0 +1,19 @@
+{
+    "status": "Status",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "duration": "Duration",
+    "delay": "Delay",
+    "reason": "Reason",
+    "note": "Note",
+    "progress": "Progress",
+    "updatedAt": "Updated At",
+    "project": "Project",
+    "assignTo": "Assign To",
+    "project Name": "Project Name",
+    "project Summary": "Project Summary",
+    "task Name": "Task Name",
+    "start Date": "Start Date",
+    "end Date": "End Date",
+    "group Name": "Group Name"
+}
