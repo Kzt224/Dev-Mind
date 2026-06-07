@@ -4,12 +4,13 @@ import { signUpHandaler } from "@/assets/api/authFetch.js";
 import { loadConfig } from "@/assets/api/fetchConfig.js";
 import { createChatsTable } from "@/assets/db/chatHeader.model";
 import { createMessagesTable } from "@/assets/db/messages.model";
-import { connectSocket, disconnectSocket, getSocket } from "@/assets/socket/socket.js";
+import { connectSocket, disconnectSocket } from "@/assets/socket/socket.js";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFonts, Inter_400Regular, Inter_700Bold } from '@expo-google-fonts/inter';
 import Loading from "../components/card/loading";
 import Error from "../components/card/error";
-
+import { usePathname, useRouter } from "expo-router";
+import { useAlertStore } from "@/assets/store/aleartStore.js";
 export const AuthContext = createContext();
 
 export default function AuthProvider({ children }) {
@@ -17,100 +18,85 @@ export default function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [config, setConfig] = useState(null);
   const [cacheProject, setProject] = useState(null);
-  const queryClient = useQueryClient();
-  const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_700Bold,
-  });
   const [connected, setConnected] = useState(true);
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathName = usePathname();
+  const [fontsLoaded] = useFonts({ Inter_400Regular, Inter_700Bold });
+  const { setSuccess, setError } = useAlertStore();
+  const [cacheToken, setToken] = useState(null);
+  const [dailyInsight, setDailyInsight] = useState(null);
+
   useEffect(() => {
-    const prepareApp = async () => {
+    const initializeApp = async () => {
       try {
         const cfg = await loadConfig();
         if (cfg) setConfig(cfg);
 
-        const [token, storedUser, storedProject] = await Promise.all([
-          AsyncStorage.getItem("Token"),
-          AsyncStorage.getItem("User"),
-          AsyncStorage.getItem("Projects"),
-        ]);
-
-        if (token && storedUser) {
-          setUser(JSON.parse(storedUser));
-          if (storedProject) setProject(JSON.parse(storedProject));
-        } else {
-          const res = await signUpHandaler();
-          if (res?.jwt) {
-            await AsyncStorage.setItem("Token", res.jwt);
-            await AsyncStorage.setItem("User", JSON.stringify(res.user));
-            setUser(res.user);
-          }
-        }
-
-        const isAlreadyInit = await AsyncStorage.getItem("initDb");
-        if (!isAlreadyInit) {
-          console.log("Initializing SQLite DB...");
+        const initDb = await AsyncStorage.getItem("initDb");
+        if (!initDb) {
           await createChatsTable();
           await createMessagesTable();
           await AsyncStorage.setItem("initDb", "true");
         }
+
+        const [token, storedUser, storedProject, storeTasks] = await Promise.all([
+          AsyncStorage.getItem("Token"),
+          AsyncStorage.getItem("User"),
+          AsyncStorage.getItem("Projects"),
+          AsyncStorage.getItem("Tasks")
+        ]);
+
+        if (token && storedUser) {
+          // User exists → continue normally
+          setUser(JSON.parse(storedUser));
+          setToken(token);
+          if (storedProject) setProject(JSON.parse(storedProject));
+          if (storeTasks)
+            if (pathName === "/login") router.replace("/"); // redirect if on login page
+        } else if (!token && !storedUser && !initDb) {
+          const res = await signUpHandaler();
+          if (res?.jwt && res?.user) {
+            await AsyncStorage.setItem("Token", res.jwt);
+            await AsyncStorage.setItem("User", JSON.stringify(res.user));
+            setUser(res.user);
+            if (pathName === "/login") router.replace("/"); // redirect to home
+          }
+        } else {
+          // No user/token (after logout) → redirect to login
+          if (pathName !== "/login") router.replace("/login");
+        }
+
       } catch (error) {
-        console.log("App Init Error:", error.message);
+        console.error("App Initialization Error:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    prepareApp();
+    initializeApp();
   }, []);
 
+
   useEffect(() => {
-    if (!user) return;
+    if (!user || !config?.API_URL) return;
 
-    const initSocket = async () => {
-      try {
-        const DEV_MIND_API = config?.API_URL || JSON.parse(await AsyncStorage.getItem("config"))?.API_URL;
-        const socket = connectSocket(user.id, DEV_MIND_API);
-
-        socket.on("connect", () => {
-          setTimeout(() => {
-            setConnected(true);
-          },10000)
-        });
-        socket.on("disconnect", () => {
-          setTimeout(() => {
-            setConnected(false);
-          }, 10000)
-        })
-        socket.on("notification", (data) => {
-          queryClient.setQueryData(["notification"], (old = []) => [data, ...old]);
-          if (data?.type === 'ASSIGN' || data?.taskId) {
-            queryClient.refetchQueries(['project']);
-          }
-        });
-      } catch (error) {
-        console.log("Socket Init Error:", error);
+    const socket = connectSocket(user.id, config.API_URL, cacheToken);
+    socket.on("connect", () => setSuccess("You are online"));
+    socket.on("disconnect", () => setError("You are offline"));
+    socket.on("daily-insight", (data) => {
+      if (data) setDailyInsight(data?.message);
+    });
+    socket.on("notification", (data) => {
+      queryClient.setQueryData(["notification"], (old = []) => [data, ...old]);
+      if (data?.type === "ASSIGN" || data?.taskId) {
+        queryClient.refetchQueries(["project"]);
       }
-    };
-
-    initSocket();
-
-    return () => {
-      disconnectSocket(); 
-    };
+    });
+    return () => disconnectSocket();
   }, [user, config]);
 
 
-  if (loading || !fontsLoaded) {
-    return (
-      <Loading />
-    );
-  }
-  if (!connected) {
-    return (
-      <Error message={"No internet connection"} fn={()=>setLoading(true)} />
-    );
-  }
   const setUserData = async (userData, token) => {
     if (token) await AsyncStorage.setItem("Token", token);
     if (userData) await AsyncStorage.setItem("User", JSON.stringify(userData));
@@ -120,20 +106,20 @@ export default function AuthProvider({ children }) {
   const logout = async () => {
     await AsyncStorage.multiRemove(["Token", "User", "Projects"]);
     setUser(null);
+    router.replace("/login");
   };
 
+  if (!fontsLoaded || loading) return <Loading />;
+
+  // if (user && !connected) {
+  //   //return <Error message="No internet connection" />;
+  //   setErrorf
+  // }
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        setUserData,
-        logout,
-        loading,
-        config,
-        cacheProject,
-      }}
+      value={{ user, setUserData, logout, loading, config, cacheProject, dailyInsight }}
     >
-      {user ? children : <Loading />}
+      {children}
     </AuthContext.Provider>
   );
 }

@@ -7,23 +7,29 @@ import { Colors } from "@/assets/mainColor/colors";
 import { useContext, useState } from "react";
 import { usePathname } from "expo-router";
 import { LanguageContext } from "@/app/hook/languageContex";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function TaskForm({ projectList }) {
+export default function TaskForm() {
   const { inputData, setInputData } = useModalStore();
   const [isPickerVisible, setPickerVisible] = useState(false);
   const [activeField, setActiveField] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const pathName = usePathname();
   const { t } = useContext(LanguageContext);
-
+  const [projectList, setProjectList] = useState(null);
   const showPicker = (field) => {
     setActiveField(field);
     setPickerVisible(true);
   };
+  const handleDropdown = async () => {
+    const project = await AsyncStorage.getItem('Projects');
+    setProjectList(JSON.parse(project));
+  }
 
   const hidePicker = () => setPickerVisible(false);
 
   const handleConfirm = (date) => {
+    setShowDropdown(!showDropdown);
     setInputData(activeField, date.toLocaleDateString());
     hidePicker();
   };
@@ -47,7 +53,7 @@ export default function TaskForm({ projectList }) {
                 placeholder={t[key] || key}
                 value={inputData[key] || ""}
                 editable={!isDateField && !isDropdown}
-                placeholderTextColor={Colors.secondary}
+                placeholderTextColor={Colors.textSecondary}
                 onChangeText={(text) => setInputData(key, text)}
                 style={{
                   borderBottomWidth: 1,
@@ -72,7 +78,7 @@ export default function TaskForm({ projectList }) {
             {/* Dropdown icon for project field */}
             {isDropdown && (
               <Pressable
-                onPress={() => setShowDropdown(!showDropdown)}
+                onPress={handleDropdown}
                 style={{ position: "absolute", right: 0, top: 8 }}
               >
                 <AntDesign name="caret-down" size={20} color={Colors.primary} />

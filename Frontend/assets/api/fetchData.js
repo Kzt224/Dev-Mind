@@ -14,9 +14,9 @@ export const getAllProject = async () => {
             }
         });
         await AsyncStorage.setItem("Projects", JSON.stringify(response.data));
-        return response.data;
+        return response.data ?? [];
     } catch (error) {
-        return[];
+        return [];
     }
 }
 export const getProjectById = async (id) => {
@@ -40,12 +40,7 @@ export const createProject = async (data) => {
     try {
         const token = await AsyncStorage.getItem('Token');
         const api = await axiosInstance();
-        const response = await api.post("/api/data/project", {
-            name: data.name,
-            summary: data.summary,
-            authorId: data.authorId,
-            duration: data.duration
-        }, {
+        const response = await api.post("/api/data/project", data, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -87,7 +82,7 @@ export const getAllTask = async () => {
                 "Authorization": `Bearer ${token}`
             }
         });
-        return response.data;
+        return response.data ?? [];
     } catch (error) {
         return [];
     }
@@ -178,7 +173,7 @@ export const getNotification = async () => {
                 "Authorization": `Bearer ${token}`
             }
         });
-        return response.data;
+        return response.data ?? [];
     } catch (error) {
         return [];
     }

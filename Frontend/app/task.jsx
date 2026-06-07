@@ -1,8 +1,8 @@
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFonts, Inter_400Regular, Inter_700Bold } from "@expo-google-fonts/inter";
 import { Colors } from "../assets/mainColor/colors";
 import Feather from "@expo/vector-icons/Feather";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { getAllTask } from "@/assets/api/fetchData.js";
@@ -15,12 +15,21 @@ import Loading from "./components/card/loading.jsx";
 import Bar from "./components/bar.jsx";
 import { useBottomBarHeight } from "./hook/barHeighContex.jsx";
 import { useNavBarHeight } from "./hook/navHeighContex.jsx";
+import useScrollAnimation from "./hook/animationContex.jsx";
+import { LanguageContext } from "./hook/languageContex.jsx";
+import Entypo from '@expo/vector-icons/Entypo';
+import Progress from "./components/progress.jsx";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { getDate, getTaskEndDate } from "../assets/helper/calculateDate.js";
+import TaskCard from "./components/card/items/TaskCard.jsx";
 
 export default function Task() {
     const [fontsLoaded] = useFonts({
         Inter_400Regular,
         Inter_700Bold,
     });
+    const { t } = useContext(LanguageContext);
+    const { scrollAnim, onScroll } = useScrollAnimation();
     const { bottomBarHeight } = useBottomBarHeight();
     const { NavBarHeight } = useNavBarHeight();
     const pathName = usePathname();
@@ -85,7 +94,6 @@ export default function Task() {
         }}>
             <View
                 style={{
-                    marginTop: NavBarHeight,
                     flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "space-between",
@@ -94,78 +102,111 @@ export default function Task() {
                 <Text
                     style={{
                         fontFamily: "Inter_700Bold",
-                        fontSize: 25,
+                        fontSize: 32,
                         color: Colors.textPrimary,
                     }}
                 >
-                    TaskList
+                    {t["Tasks"]}
                 </Text>
-                <Pressable onPress={() => setShowMenu(!showMenu)}>
-                    <Feather name="filter" size={35} color={Colors.textPrimary} />
-                </Pressable>
-                {showMenu && (
-                    <View style={[styles.menu, customCard['cardNormal']]}>
-                        <Pressable style={[styles.item, styles.itemBorder]} onPress={() => handleSort("name")}>
-                            <Text style={styles.menuText}>Sort By name</Text>
-                        </Pressable>
-                        <Pressable style={[styles.item, styles.itemBorder]} onPress={() => handleSort("project")}>
-                            <Text style={styles.menuText}>Sort By project</Text>
-                        </Pressable>
-                        <Pressable style={styles.item} onPress={() => handleSort("status")}>
-                            <Text style={styles.menuText}>Sort By status</Text>
-                        </Pressable>
-                    </View>
-                )}
+                <AddButton name={"forTask"} />
             </View>
-            <ScrollView style={{ padding: 2, marginBottom: bottomBarHeight }}
+            <ScrollView onScroll={onScroll} style={{ padding: 2, marginBottom: bottomBarHeight }}
                 contentContainerStyle={{ paddingBottom: 50 }}
                 showsVerticalScrollIndicator={false}
             >
-                {goals?.map((d) => (
-                    <Pressable onPress={() => handleNavigate(d)} key={d?.id} style={[styles.itemContainer, customCard['cardNormal']]}>
-                        <Text style={{ fontWeight: "bold", color: Colors.textSecondary }}>{d?.name}</Text>
-                        <Text style={{ fontWeight: "bold", color: Colors.textSecondary }}>{d?.project?.name}</Text>
-                        <MaterialCommunityIcons name={GetIcon(d)} size={25} color={Colors[getStatusColor(d)]} />
-                    </Pressable>
-                ))}
+                {/* {goals?.map((d) => (
+                    // <Pressable onPress={() => handleNavigate(d)} key={d?.id} style={[styles.itemContainer, customCard['cardNormal']]}>
+                    //     <View style={styles.upperContainer}>
+                    //         <Text style={{
+                    //             color: Colors.textPrimary,
+                    //             fontFamily: "Inter_700Bold",
+                    //             fontSize: 20,
+                    //         }}>{d?.name}</Text>
+                    //         <Entypo name="dots-three-vertical" size={20} color={Colors.textPrimary} />
+                    //     </View>
+                    //     <View style={styles.middleContainer}>
+                    //         <View style={styles.innerLeftConitainer}>
+                    //             <Text
+                    //                 style={{
+                    //                     color: Colors.textSecondary,
+                    //                     fontFamily: "Inter_700Bold",
+                    //                     fontSize: 16,
+                    //                 }}
+                    //             >Progress</Text>
+                    //             <View style={styles.dateContainer}>
+                    //                 <Text style={{ fontWeight: "bold", fontSize: 12 }}>{getTaskEndDate(d?.endDate)}</Text>
+                    //             </View>
+                    //         </View>
+                    //         <View style={styles.innerRightContiner}>
+                    //             <Text style={{ color: Colors.textSecondary, fontWeight: "bold" }}>Due: 10 tasks</Text>
+                    //         </View>
+                    //     </View>
+                    //     <Progress pg={d?.progress} />
+                    //     <View style={styles.bottomContainer}>
+                    //         <View style={styles.checkContainer}>
+                    //             <FontAwesome name="check-circle" size={22} color={Colors.success} />
+                    //             <Text style={{ color: Colors.textSecondary, fontWeight: "bold" }}>AI Health Check</Text>
+                    //         </View>
+                    //         <Text style={{ color: Colors.textSecondary, fontWeight: "bold" }}>10 Tasks</Text>
+                    //     </View>
+                    // </Pressable>
+                ))} */}
+                <TaskCard data={goals ? goals : []} />
             </ScrollView>
-            {/* add button */}
-            <AddButton name={"forTask"} />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     itemContainer: {
-        padding: 30,
+        padding: 15,
         marginTop: 15,
+        flexDirection: "col",
+        alignItems: "center",
+    },
+    upperContainer: {
+        display: "flex",
+        flexDirection: "row",
+        width: "100%",
+        justifyContent: "space-between",
+        alignItems: "center"
+    },
+    middleContainer: {
+        display: "flex",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
+        width: "100%",
+        marginTop: 8
     },
-    menu: {
-        width: "50%",
-        flexDirection: "column",
+    innerLeftConitainer: {
+        display: "flex",
+        flexDirection: "row",
+        gap: 8
+    },
+    dateContainer: {
+        backgroundColor: Colors.bgWarning,
+        padding: 4,
+        borderRadius: 8
+    },
+    bottomContainer: {
+        display: "flex",
+        width: "100%",
+        marginTop: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between"
+    },
+    checkContainer: {
+        display: "flex",
+        flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 10,
-        position: "absolute",
-        right: 35,
-        top: 20,
-        zIndex: 5,
-    },
-    itemBorder: {
-        borderBottomWidth: 0.5,
-        borderColor: Colors.lightIndigo
-    },
-    item: {
-        width: "100%",
-        padding: 8
-    },
-    menuText: {
-        color: Colors.textSecondary,
-        fontWeight: "bold",
-        alignItems: "center",
-        alignSelf: "center",
-    },
+        backgroundColor: Colors.bgSuccess,
+        padding: 3,
+        gap: 8,
+        paddingHorizontal: 5,
+        borderRadius: 10
+    }
+
 });

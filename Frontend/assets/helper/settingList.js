@@ -32,7 +32,7 @@ export const settingList = [
         description: "Logout",
         color: "danger",
         icon: "logout",
-        bg: "reject",
-        link : "logout"
+        bg: "bgDanger",
+        link: "logout"
     },
 ];

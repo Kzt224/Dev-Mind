@@ -17,7 +17,6 @@ export const shadowStyles = {
 export const customCard = {
   get cardNormal() {
     return {
-      backgroundColor: Colors.white,
       borderRadius: 14,
       borderWidth: 1,
       borderColor: Colors.gray,

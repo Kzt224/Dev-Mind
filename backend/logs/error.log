@@ -1,0 +1,147 @@
+[2026-04-08T16:30:32.831Z] [ERROR] test | userId=1 error=something was wrong
+[2026-04-08T16:31:24.841Z] [ERROR] test | userId=1 error=something was wrong
+[2026-05-04T14:52:15.883Z] [ERROR] TeamController.getGroupDetail failed! | userId=5 error=TypeError: Cannot convert object to primitive value
+[2026-05-04T14:53:43.638Z] [ERROR] TeamController.getGroupDetail failed! | userId=5 error=TypeError: Cannot convert object to primitive value
+[2026-05-04T14:54:54.369Z] [ERROR] TeamController.getGroupDetail failed! | userId=5 error=TypeError: Cannot convert object to primitive value
+[2026-05-04T14:56:19.635Z] [ERROR] TeamController.getGroupDetail failed! | userId=5 error=TypeError: Cannot convert object to primitive value
+[2026-05-04T14:57:04.593Z] [ERROR] TeamController.getGroupDetail failed! | userId=5 error=TypeError: Cannot convert object to primitive value
+[2026-05-04T14:58:10.995Z] [ERROR] TeamController.getGroupDetail failed! | userId=5 error=TypeError: Cannot convert object to primitive value
+[2026-05-04T14:58:54.215Z] [ERROR] TeamController.getGroupDetail failed! | userId=5 error=TypeError: Cannot convert object to primitive value
+[2026-05-04T15:04:20.035Z] [ERROR] TeamService.generateInviteLink failed! | userId=5 error=PrismaClientValidationError: 
+Invalid `this.prisma.invitation.findFirst()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:135:69
+
+  132 const expiresAt = new Date();
+  133 expiresAt.setHours(expiresAt.getHours() + 24);
+  134 
+→ 135 const existingInvitation = await this.prisma.invitation.findFirst({
+        where: {
+          leaderId: 5,
+      +   groupId: {
+      +     equals: Int | IntFieldRefInput,
+      +     in: Int[],
+      +     notIn: Int[],
+      +     lt: Int | IntFieldRefInput,
+      +     lte: Int | IntFieldRefInput,
+      +     gt: Int | IntFieldRefInput,
+      +     gte: Int | IntFieldRefInput,
+      +     not: Int | NestedIntFilter
+      +   }
+        }
+      })
+
+Argument `groupId` is missing.
+[2026-05-04T15:04:29.348Z] [ERROR] TeamService.generateInviteLink failed! | userId=5 error=PrismaClientValidationError: 
+Invalid `this.prisma.invitation.findFirst()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:135:69
+
+  132 const expiresAt = new Date();
+  133 expiresAt.setHours(expiresAt.getHours() + 24);
+  134 
+→ 135 const existingInvitation = await this.prisma.invitation.findFirst({
+        where: {
+          leaderId: 5,
+      +   groupId: {
+      +     equals: Int | IntFieldRefInput,
+      +     in: Int[],
+      +     notIn: Int[],
+      +     lt: Int | IntFieldRefInput,
+      +     lte: Int | IntFieldRefInput,
+      +     gt: Int | IntFieldRefInput,
+      +     gte: Int | IntFieldRefInput,
+      +     not: Int | NestedIntFilter
+      +   }
+        }
+      })
+
+Argument `groupId` is missing.
+[2026-05-04T15:08:59.548Z] [ERROR] TeamService.generateInviteLink failed! | userId=5 error=PrismaClientValidationError: 
+Invalid `this.prisma.invitation.findFirst()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:135:69
+
+  132 const expiresAt = new Date();
+  133 expiresAt.setHours(expiresAt.getHours() + 24);
+  134 
+→ 135 const existingInvitation = await this.prisma.invitation.findFirst({
+        where: {
+          leaderId: 5,
+      +   groupId: {
+      +     equals: Int | IntFieldRefInput,
+      +     in: Int[],
+      +     notIn: Int[],
+      +     lt: Int | IntFieldRefInput,
+      +     lte: Int | IntFieldRefInput,
+      +     gt: Int | IntFieldRefInput,
+      +     gte: Int | IntFieldRefInput,
+      +     not: Int | NestedIntFilter
+      +   }
+        }
+      })
+
+Argument `groupId` is missing.
+[2026-05-04T15:17:49.336Z] [ERROR] TeamService.generateInviteLink failed! | userId=5 error=PrismaClientValidationError: 
+Invalid `this.prisma.invitation.findFirst()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:135:69
+
+  132 const expiresAt = new Date();
+  133 expiresAt.setHours(expiresAt.getHours() + 24);
+  134 
+→ 135 const existingInvitation = await this.prisma.invitation.findFirst({
+        where: {
+          leaderId: 5,
+      +   groupId: {
+      +     equals: Int | IntFieldRefInput,
+      +     in: Int[],
+      +     notIn: Int[],
+      +     lt: Int | IntFieldRefInput,
+      +     lte: Int | IntFieldRefInput,
+      +     gt: Int | IntFieldRefInput,
+      +     gte: Int | IntFieldRefInput,
+      +     not: Int | NestedIntFilter
+      +   }
+        }
+      })
+
+Argument `groupId` is missing.
+[2026-05-04T15:18:11.011Z] [ERROR] TeamService.generateInviteLink failed! | userId=5 error=PrismaClientValidationError: 
+Invalid `this.prisma.invitation.findFirst()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:135:69
+
+  132 const expiresAt = new Date();
+  133 expiresAt.setHours(expiresAt.getHours() + 24);
+  134 
+→ 135 const existingInvitation = await this.prisma.invitation.findFirst({
+        where: {
+          leaderId: 5,
+      +   groupId: {
+      +     equals: Int | IntFieldRefInput,
+      +     in: Int[],
+      +     notIn: Int[],
+      +     lt: Int | IntFieldRefInput,
+      +     lte: Int | IntFieldRefInput,
+      +     gt: Int | IntFieldRefInput,
+      +     gte: Int | IntFieldRefInput,
+      +     not: Int | NestedIntFilter
+      +   }
+        }
+      })
+
+Argument `groupId` is missing.
+[2026-05-23T08:58:57.672Z] [ERROR] TeamService.createGroup failed! | userId=5 error=PrismaClientValidationError: 
+Invalid `this.prisma.group.create()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:43:52
+
+  40 async createGroup(userId: number, name: string) {
+  41     try {
+  42         if (!name) return { status: 400, json: { message: "Group name is required" } };
+→ 43         const result = await this.prisma.group.create({
+               data: {
+                 name: {
+                   name: "He"
+                 },
+                 ~~~~~~~~~~~~
+                 ownerId: 5
+               }
+             })
+
+Argument `name`: Invalid value provided. Expected String, provided Object.

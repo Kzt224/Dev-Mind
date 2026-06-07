@@ -6,17 +6,20 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useContext, useState } from "react";
 import { AuthContext } from "../hook/authContex";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { settingList } from "../../assets/helper/settingList";
+import { settingList } from "@/assets/helper/settingList";
 import { useRouter } from "expo-router";
 import { useNavBarHeight } from "../hook/navHeighContex";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./card/loading";
-import {getUserById} from "@/assets/api/fetchUser.js";
+import { getUserById } from "@/assets/api/fetchUser.js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LanguageContext } from "../hook/languageContex";
 export default function Account() {
 
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const { NavBarHeight } = useNavBarHeight();
+  const { t } = useContext(LanguageContext);
   const router = useRouter();
   const { data: account, isLoading, isError } = useQuery({
     queryKey: ['userInfo', user?.id],
@@ -26,19 +29,23 @@ export default function Account() {
   const profile = account?.user;
   const handleNavigate = (link) => {
     if (!link) return;
-    router.push({
-      pathname: `/components/setting/${link}`,
-      params: { id: user?.id || 0 }
-    })
+    if (link === 'logout') {
+      logout();
+    } else {
+      router.push({
+        pathname: `/components/setting/${link}`,
+        params: { id: user?.id || 0 }
+      })
+    }
   }
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, padding: 15, backgroundColor: Colors.bgPrimary }}>
         {/* loading */}
-        {isLoading && <Loading/>}
+        {isLoading && <Loading />}
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* profile image box */}
-          <View style={[styles.ppImageContainer, { marginTop: NavBarHeight }]}>
+          <View style={styles.ppImageContainer}>
             <View style={styles.imgContainer}>
               <View style={styles.img}>
                 <Text style={{ color: Colors.white, fontSize: 27, fontWeight: "bold" }}>
@@ -99,7 +106,7 @@ export default function Account() {
                   <MaterialIcons name={i?.icon} size={30} color={Colors[i?.color]} />
                 </View>
                 <View style={styles.listText}>
-                  <Text style={{ color: Colors.textPrimary, fontWeight: "bold" }}>{i?.name}</Text>
+                  <Text style={{ color: Colors.textPrimary, fontWeight: "bold" }}>{t[i?.name]}</Text>
                   <Text style={{ color: Colors.textSecondary, fontSize: 13 }}>{i?.description}</Text>
                 </View>
               </Pressable>

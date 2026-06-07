@@ -4,7 +4,7 @@ import { useModalStore } from "@/assets/store/modalStore";
 import QRCode from "react-native-qrcode-svg";
 
 export default function InviteForm() {
-  const {step,data } = useModalStore();
+  const { step, data } = useModalStore();
 
   return (
     <View>
@@ -19,7 +19,7 @@ export default function InviteForm() {
           flexDirection: "column"
         }}>
           <QRCode
-            value={data ? data : 'www.google.com'}
+            value={data ? data?.token : 'www.google.com'}
             size={200}
             color={Colors.textPrimary}
             backgroundColor={Colors.bgPrimary}

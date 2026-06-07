@@ -20,7 +20,7 @@ export default function PopupInput() {
     const { isVisible, closeModal, modalType, inputData, editProject, editTask, groupId, step, setStep, qrToken, id } = useModalStore();
     const { user, cacheProject } = useContext(AuthContext);
     const queryClient = useQueryClient();
-    const { setSuccess, setError, } = useAlertStore();
+    const { setSuccess, setError } = useAlertStore();
     const projectList = cacheProject?.result;
     const pathName = usePathname();
     const mutation = useMutation({
@@ -50,6 +50,8 @@ export default function PopupInput() {
                 summary: inputData["project Summary"],
                 authorId: user.id,
                 duration: inputData["duration"],
+                category: inputData["category"],
+                priority: inputData['priority']
             }),
             validate: (data) => data.name && data.summary,
             mutate: createProject,
@@ -217,7 +219,7 @@ export default function PopupInput() {
             onRequestClose={closeModal}
         >
             <View style={styles.overlay}>
-                <View style={[styles.modalBox,{backgroundColor: Colors.white}]}>
+                <View style={[styles.modalBox, { backgroundColor: Colors.white }]}>
                     <View style={styles.formGroup}>
                         {ModelComponents[modalType]?.page}
                         <>

@@ -8,7 +8,6 @@ export const loadConfig = async () => {
         try {
             const response = await fetch(URL);
             const data = await response.json();
-
             await AsyncStorage.setItem('config', JSON.stringify(data));
             return data;
         } catch (error) {

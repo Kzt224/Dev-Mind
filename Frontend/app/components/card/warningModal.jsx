@@ -59,11 +59,10 @@ export default function WarningModal({ duration = 3000 }) {
                         height: "9%",
                         position: "absolute",
                         bottom: 90,
-                        backgroundColor: Colors.bgInfo,
+                        backgroundColor: Colors.warning,
                         alignItems: "center",
                         justifyContent: "center",
                         borderRadius: 5,
-                        boxShadow: shadowStyles.containerStyle.boxShadow,
                     }}
                 >
                     <View style={{

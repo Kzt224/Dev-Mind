@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1772362611219" clover="3.2.0">
-  <project timestamp="1772362611220" name="All files">
+<coverage generated="1773851060632" clover="3.2.0">
+  <project timestamp="1773851060632" name="All files">
     <metrics statements="259" coveredstatements="137" conditionals="4104" coveredconditionals="426" methods="1401" coveredmethods="180" elements="5764" coveredelements="743" complexity="0" loc="259" ncloc="259" packages="6" files="8" classes="8"/>
     <package name="generated.prisma">
       <metrics statements="68" coveredstatements="63" conditionals="8" coveredconditionals="4" methods="1" coveredmethods="0"/>
-      <file name="index.js" path="C:\Users\Dell\Desktop\Ai Mentor\Ai_Mentor\backend\generated\prisma\index.js">
+      <file name="index.js" path="C:\Users\Dell\Desktop\AI_MENTOR\backend\generated\prisma\index.js">
         <metrics statements="68" coveredstatements="63" conditionals="8" coveredconditionals="4" methods="1" coveredmethods="0"/>
         <line num="6" count="3" type="stmt"/>
         <line num="30" count="3" type="stmt"/>
@@ -78,7 +78,7 @@
     </package>
     <package name="generated.prisma.runtime">
       <metrics statements="50" coveredstatements="29" conditionals="4000" coveredconditionals="404" methods="1376" coveredmethods="171"/>
-      <file name="library.js" path="C:\Users\Dell\Desktop\Ai Mentor\Ai_Mentor\backend\generated\prisma\runtime\library.js">
+      <file name="library.js" path="C:\Users\Dell\Desktop\AI_MENTOR\backend\generated\prisma\runtime\library.js">
         <metrics statements="50" coveredstatements="29" conditionals="4000" coveredconditionals="404" methods="1376" coveredmethods="171"/>
         <line num="5" count="2970" type="cond" truecount="71" falsecount="99"/>
         <line num="6" count="36" type="cond" truecount="3" falsecount="1"/>
@@ -134,7 +134,7 @@
     </package>
     <package name="src.chat">
       <metrics statements="69" coveredstatements="19" conditionals="54" coveredconditionals="7" methods="7" coveredmethods="2"/>
-      <file name="suggest.js" path="C:\Users\Dell\Desktop\Ai Mentor\Ai_Mentor\backend\src\chat\suggest.js">
+      <file name="suggest.js" path="C:\Users\Dell\Desktop\AI_MENTOR\backend\src\chat\suggest.js">
         <metrics statements="69" coveredstatements="19" conditionals="54" coveredconditionals="7" methods="7" coveredmethods="2"/>
         <line num="4" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
@@ -209,7 +209,7 @@
     </package>
     <package name="src.controller">
       <metrics statements="51" coveredstatements="9" conditionals="29" coveredconditionals="5" methods="11" coveredmethods="2"/>
-      <file name="notiAutoMation.controller.js" path="C:\Users\Dell\Desktop\Ai Mentor\Ai_Mentor\backend\src\controller\notiAutoMation.controller.js">
+      <file name="notiAutoMation.controller.js" path="C:\Users\Dell\Desktop\AI_MENTOR\backend\src\controller\notiAutoMation.controller.js">
         <metrics statements="51" coveredstatements="9" conditionals="29" coveredconditionals="5" methods="11" coveredmethods="2"/>
         <line num="13" count="3" type="stmt"/>
         <line num="14" count="3" type="stmt"/>
@@ -266,27 +266,27 @@
     </package>
     <package name="src.controller.userNoti">
       <metrics statements="9" coveredstatements="7" conditionals="8" coveredconditionals="1" methods="3" coveredmethods="3"/>
-      <file name="updateUserInfoNoti.js" path="C:\Users\Dell\Desktop\Ai Mentor\Ai_Mentor\backend\src\controller\userNoti\updateUserInfoNoti.js">
+      <file name="updateUserInfoNoti.js" path="C:\Users\Dell\Desktop\AI_MENTOR\backend\src\controller\userNoti\updateUserInfoNoti.js">
         <metrics statements="9" coveredstatements="7" conditionals="8" coveredconditionals="1" methods="3" coveredmethods="3"/>
+        <line num="12" count="2" type="stmt"/>
         <line num="13" count="2" type="stmt"/>
         <line num="14" count="2" type="stmt"/>
-        <line num="15" count="2" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
         <line num="18" count="1" type="stmt"/>
-        <line num="19" count="1" type="stmt"/>
-        <line num="25" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="24" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="28" count="1" type="stmt"/>
         <line num="29" count="1" type="stmt"/>
-        <line num="30" count="1" type="stmt"/>
-        <line num="36" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="35" count="0" type="cond" truecount="0" falsecount="2"/>
       </file>
     </package>
     <package name="src.libs">
       <metrics statements="12" coveredstatements="10" conditionals="5" coveredconditionals="5" methods="3" coveredmethods="2"/>
-      <file name="notiEmitter.js" path="C:\Users\Dell\Desktop\Ai Mentor\Ai_Mentor\backend\src\libs\notiEmitter.js">
+      <file name="notiEmitter.js" path="C:\Users\Dell\Desktop\AI_MENTOR\backend\src\libs\notiEmitter.js">
         <metrics statements="2" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="3" count="1" type="stmt"/>
         <line num="4" count="0" type="stmt"/>
       </file>
-      <file name="notificationService.js" path="C:\Users\Dell\Desktop\Ai Mentor\Ai_Mentor\backend\src\libs\notificationService.js">
+      <file name="notificationService.js" path="C:\Users\Dell\Desktop\AI_MENTOR\backend\src\libs\notificationService.js">
         <metrics statements="9" coveredstatements="8" conditionals="5" coveredconditionals="5" methods="2" coveredmethods="2"/>
         <line num="3" count="2" type="stmt"/>
         <line num="4" count="2" type="stmt"/>
@@ -298,7 +298,7 @@
         <line num="18" count="0" type="stmt"/>
         <line num="20" count="2" type="stmt"/>
       </file>
-      <file name="prisma.js" path="C:\Users\Dell\Desktop\Ai Mentor\Ai_Mentor\backend\src\libs\prisma.js">
+      <file name="prisma.js" path="C:\Users\Dell\Desktop\AI_MENTOR\backend\src\libs\prisma.js">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="4" count="3" type="stmt"/>
       </file>

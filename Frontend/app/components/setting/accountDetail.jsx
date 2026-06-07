@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator, Scroll
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/assets/mainColor/colors.js";
 import { customCard } from "@/assets/themes/style.js";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUserById, updateuserInfo, updatePassword } from "@/assets/api/fetchUser.js";
@@ -16,13 +16,15 @@ import { checkMandatoryFields } from "../../../assets/helper/mandatory.js";
 import { useAlertStore } from "@/assets/store/aleartStore.js";
 import { useNavBarHeight } from "../../hook/navHeighContex.jsx";
 import { useBottomBarHeight } from "../../hook/barHeighContex.jsx";
+import { LanguageContext } from "../../hook/languageContex.jsx";
+import Feather from '@expo/vector-icons/Feather';
 
 export default function AccountDetail() {
 
     const { id } = useLocalSearchParams();
     const { NavBarHeight } = useNavBarHeight();
     const { bottomBarHeight } = useBottomBarHeight();
-
+    const { t } = useContext(LanguageContext);
     const { data: item, isLoading, isError, refetch } = useQuery({
         queryKey: ['userInfo', id],
         queryFn: () => getUserById(id),
@@ -31,12 +33,14 @@ export default function AccountDetail() {
     const { setSuccess, setError } = useAlertStore();
     const [formData, setFormData] = useState({});
     const [originalData, setOriginalData] = useState({});
-    const user = item?.user;
-    const [validateFail, setValidateFail] = useState([]);
-    const queryClient = useQueryClient();
     const [upPass, setPassword] = useState({
         password: ""
     });
+    const user = item?.user;
+    const [validateFail, setValidateFail] = useState([]);
+    const queryClient = useQueryClient();
+
+    const [showPassword, setShowPassword] = useState(false);
     useEffect(() => {
         if (user) {
             setFormData(user);
@@ -113,7 +117,7 @@ export default function AccountDetail() {
 
             >
                 <ScrollView showsVerticalScrollIndicator={false}
-                    style={{ marginBottom: bottomBarHeight,marginTop: NavBarHeight}}
+                    style={{ marginBottom: bottomBarHeight }}
                 >
                     <KeyboardAwareScrollView
                         enableOnAndroid={true}
@@ -131,7 +135,7 @@ export default function AccountDetail() {
                                     fontSize: 16
                                 }}
                             >
-                                Your Info
+                                {t["Your Info"]}
                             </Text>
 
                             {Object.entries(formData)?.map(([key, value]) => (
@@ -181,12 +185,12 @@ export default function AccountDetail() {
                                     <Text
                                         style={{
                                             color: isChanged
-                                                ? Colors.white
+                                                ? Colors.textPrimary
                                                 : Colors.primary,
                                             fontWeight: "bold"
                                         }}
                                     >
-                                        Submit
+                                        {t["Submit"]}
                                     </Text>
                                 )}
 
@@ -207,7 +211,7 @@ export default function AccountDetail() {
                                     fontSize: 16
                                 }}
                             >
-                                Update password
+                                {t["Update password"]}
                             </Text>
 
                             <View style={styles.info}>
@@ -223,8 +227,22 @@ export default function AccountDetail() {
                                     value={upPass?.password}
                                     style={[{ borderBottomColor: Colors.gray }, styles.input]}
                                     onChangeText={(text) => setPassword({ ...upPass, password: text })}
-                                    secureTextEntry
+                                    secureTextEntry={!showPassword}
                                 />
+                                <Pressable onPress={() => setShowPassword(!showPassword)}
+                                    style={{
+                                        position: "absolute",
+                                        right: 20
+                                    }}
+                                >
+                                    {showPassword ? (
+                                        <Feather name="eye-off"
+                                            size={23} color={Colors.textPrimary} />
+                                    ) : (
+                                        <Feather name="eye"
+                                            size={23} color={Colors.textPrimary} />
+                                    )}
+                                </Pressable>
                             </View>
 
                             <Pressable
@@ -236,16 +254,15 @@ export default function AccountDetail() {
                                     },
                                     upPass?.password === "" ?
                                         dvmBtn["btnDisable"] : dvmBtn['btnPrimary']
-
                                 ]}
                             >
                                 <Text
                                     style={{
-                                        color: upPass?.password === '' ? Colors.primary : Colors.gray,
+                                        color: upPass?.password === '' ? Colors.primary : Colors.textPrimary,
                                         fontWeight: "bold"
                                     }}
                                 >
-                                    Submit
+                                    {t["Submit"]}
                                 </Text>
                             </Pressable>
                         </View>

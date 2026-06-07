@@ -7,11 +7,14 @@ import { customCard, shadowStyles } from "../../assets/themes/style";
 //import Calendar from "./calendar";
 import CalendarComp from "./calendar";
 import Defination from "./Defination";
+import { useContext } from "react";
+import { LanguageContext } from "../hook/languageContex";
 export default function TimeLine({ tasks }) {
     const [fontsLoaded] = useFonts({
         Inter_400Regular,
         Inter_700Bold,
     });
+    const {t} = useContext(LanguageContext);
 
     if (!fontsLoaded) {
         return <ActivityIndicator size="large" color={Colors.primary} />;
@@ -22,14 +25,14 @@ export default function TimeLine({ tasks }) {
             {tasks?.length > 0 ? (
                 <View style={styles.container}>
                     <Text style={{ fontFamily: "Inter_700Bold", color: Colors.textPrimary, fontSize: 25 }}>
-                        Timeline
+                    {t["Timeline"]}
                     </Text>
                     <View style={[styles.calendar,customCard['cardNormal']]}>
                         {/* table header */}
                         <CalendarComp tasks={tasks}/>
                     </View>
                     <Text style={{ fontFamily: "Inter_700Bold", color: Colors.textPrimary, fontSize: 25 ,marginTop:25}}>
-                        Color Defination
+                       {t["Color Defination"]}
                     </Text>
                     <View>
                         {/* color defination */}

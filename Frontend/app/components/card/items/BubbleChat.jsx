@@ -22,13 +22,16 @@ export default function BubbleChat({ message }) {
             )}
             <View style={[customCard['cardNormal'],
             {
-                width: "50%",
+                width: "auto",
                 padding: 10,
                 margin: 5,
                 marginLeft: ai ? 8 : '',
+                marginHorizontal: 10,
                 alignSelf: user ? "flex-end" : "flex-start"
             }]}>
-                <Text style={{ color: Colors.textPrimary }}>{message?.text}</Text>
+                <View style={{width: "85%"}}>
+                    <Text style={{ color: Colors.textPrimary }}>{message?.text}</Text>
+                </View>
             </View>
         </View>
 

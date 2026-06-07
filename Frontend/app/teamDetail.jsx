@@ -1,4 +1,4 @@
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Animated, ScrollView, StyleSheet, View } from "react-native";
 import AddButton from "./components/button/addBtn.jsx";
 import { useFonts, Inter_400Regular, Inter_700Bold } from '@expo-google-fonts/inter';
 import { useLocalSearchParams } from "expo-router";
@@ -11,6 +11,7 @@ import { AuthContext } from "./hook/authContex.jsx";
 import MemberItem from "./components/card/items/memberItem.jsx";
 import { Colors } from "../assets/mainColor/colors.js";
 import { useNavBarHeight } from "./hook/navHeighContex.jsx";
+import useScrollAnimation from "./hook/animationContex.jsx";
 export default function TeamDetail() {
 
     const [fontsLoaded] = useFonts({
@@ -18,6 +19,7 @@ export default function TeamDetail() {
         Inter_700Bold,
     });
     const { id } = useLocalSearchParams();
+    const { scrollAnim, onScroll } = useScrollAnimation();
     const { user } = useContext(AuthContext);
     const { NavBarHeight } = useNavBarHeight();
     const { data: groupDetail, isLoading, isError, refetch } = useQuery({
@@ -46,7 +48,7 @@ export default function TeamDetail() {
     }
     return (
         <View style={{ flex: 1, padding: 15, backgroundColor: Colors.bgPrimary }}>
-            <ScrollView style={{marginTop: NavBarHeight}}>
+            <ScrollView style={{ marginTop: NavBarHeight }}>
                 <View style={styles.itemParent}>
                     {member?.map((i) => (
                         <MemberItem
@@ -59,7 +61,21 @@ export default function TeamDetail() {
                 </View>
             </ScrollView>
             {permission.canInvite && (
-                <AddButton name={'forInvite'} id={id} icName={"person-add"} />
+                <Animated.View
+                    style={{
+                        position: "absolute",
+                        right: 20,
+                        bottom: 80,
+                        transform: [{
+                            translateY: scrollAnim.interpolate({
+                                inputRange: [0, 50],
+                                outputRange: [0, 100]
+                            })
+                        }]
+                    }}
+                >
+                    <AddButton name={'forInvite'} id={id} size={25} text={'invite new user'} icName={"usergroup-add"} />
+                </Animated.View>
             )}
         </View>
     );

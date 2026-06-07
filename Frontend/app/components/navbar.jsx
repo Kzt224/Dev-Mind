@@ -7,6 +7,8 @@ import { Colors } from "@/assets/mainColor/colors";
 import { useDrawer } from "../hook/drawercontex";
 import { customCard, shadowStyles } from "@/assets/themes/style";
 import { useNavBarHeight } from "../hook/navHeighContex";
+import { useContext } from "react";
+import { LanguageContext } from "../hook/languageContex";
 export default function NavBar({ name }) {
     const { openDrawer } = useDrawer();
     const router = useRouter();
@@ -14,6 +16,8 @@ export default function NavBar({ name }) {
         IBMPlexSans_400Regular,
         IBMPlexSans_700Bold,
     });
+    const { t } = useContext(LanguageContext);
+
     const { setNavBarHeight } = useNavBarHeight();
     const handleDrawer = () => openDrawer();
 
@@ -26,8 +30,8 @@ export default function NavBar({ name }) {
                 <Pressable onPress={() => router.back()}>
                     <MaterialIcons name="keyboard-arrow-left" size={40} color={Colors.textPrimary} />
                 </Pressable>
-                <Text style={{ color: Colors.textPrimary, fontFamily: "IBMPlexSans_700Bold", fontSize: 20, marginBottom: 3 }}>{name.toUpperCase()}</Text>
-                {name === 'chat' ? (
+                <Text style={{ color: Colors.textPrimary, fontFamily: "IBMPlexSans_700Bold", fontSize: 20, marginBottom: 3 }}>{t[name]}</Text>
+                {name === 'Chat' ? (
                     <Pressable onPress={handleDrawer}>
                         <MaterialCommunityIcons name="menu" size={35} color={Colors.textPrimary} style={{ marginRight: 20 }} />
                     </Pressable>

@@ -235,6 +235,7 @@ export default function Chat() {
 
                     <FlatList
                         style={{marginTop: NavBarHeight}}
+                        showsVerticalScrollIndicator={false}
                         data={messages}
                         inverted
                         keyExtractor={(item) => item._id.toString()}

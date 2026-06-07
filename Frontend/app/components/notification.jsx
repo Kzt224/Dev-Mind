@@ -6,15 +6,17 @@ import Loading from "./card/loading";
 import Error from "./card/error";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NotiCard from "./card/notiCard";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useAlertStore } from "../../assets/store/aleartStore";
 import { useNavBarHeight } from "../hook/navHeighContex.jsx";
+import { LanguageContext } from "../hook/languageContex.jsx";
 export default function NotiFication() {
     const [fontsLoaded] = useFonts({
         Inter_400Regular,
         Inter_700Bold,
     });
+    const { t } = useContext(LanguageContext);
     const { NavBarHeight } = useNavBarHeight();
     const { setSuccess, setError } = useAlertStore();
     const [selectMode, setSelectMode] = useState(false);
@@ -90,12 +92,11 @@ export default function NotiFication() {
                 justifyContent: "space-between",
                 flexDirection: "row",
                 display: "flex",
-                marginTop: NavBarHeight
             }}>
                 <Text style={{
                     fontFamily: "Inter_400Regular",
                     fontSize: 20, color: Colors.textPrimary, fontWeight: "bold"
-                }}>Notifications</Text>
+                }}>{t["Notifications"]}</Text>
                 {selectMode && (
                     <Pressable onPress={handleDelete}>
                         <FontAwesome name="trash" size={24} color={Colors.danger} />
@@ -103,9 +104,9 @@ export default function NotiFication() {
                 )}
             </View>
             {/* loading */}
-            {(!fontsLoaded || isLoading || mutation.isPending) && <Loading/>}
+            {(!fontsLoaded || isLoading || mutation.isPending) && <Loading />}
             {/* error */}
-            {isError && <Error/>}
+            {isError && <Error />}
             {/* main loop all noti */}
             <ScrollView style={styles.notiParent} showsVerticalScrollIndicator={false}>
                 {noti && noti?.map((not) => (

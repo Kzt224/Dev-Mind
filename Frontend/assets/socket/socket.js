@@ -2,13 +2,13 @@ import { io } from "socket.io-client";
 
 let socket = null;
 
-export const connectSocket = (userId, uri) => {
+export const connectSocket = (userId, uri, token) => {
     try {
         if (!socket) {
-             socket = io(uri, {
+            socket = io(uri, {
                 transports: ["websocket"],
                 autoConnect: true,
-                query: { userId },
+                query: { userId, token },
             });
 
             return socket;

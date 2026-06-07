@@ -10,6 +10,7 @@ import { checkInviteLink } from "@/assets/api/fetchData.js";
 import Error from "./card/error.jsx";
 import { useModalStore } from '@/assets/store/modalStore.js';
 import { Audio } from 'expo-av';
+import Octicons from '@expo/vector-icons/Octicons.js';
 
 const { width } = Dimensions.get('window');
 
@@ -128,8 +129,8 @@ export default function Scanner() {
             </View>
 
             <Pressable style={styles.backBtn} onPress={() => router.back()}>
-                <MaterialIcons
-                    name="keyboard-arrow-left"
+                <Octicons
+                    name="arrow-left"
                     size={40}
                     color={Colors.primary}
                 />

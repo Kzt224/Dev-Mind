@@ -1,11 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from 'expo-device';
 import { axiosInstance } from "./axios.js";
+import axios from "axios";
 
 export const signUpHandaler = async (userData = null) => {
     try {
         const token = await AsyncStorage.getItem("Toke");
-        console.log(token);
         if (token) return token;
 
         let data = userData;
@@ -23,7 +23,24 @@ export const signUpHandaler = async (userData = null) => {
         const result = await api.post("/api/auth/signup", data);
         return result.data;
     } catch (error) {
-        console.log("error on fetch auth.js", error);
+        if (axios.isAxiosError(error) && error.response) {
+            return Promise.reject(error.response.data);
+        }
+        return Promise.reject({ message: error.message || "Something went wrong" });
     }
 }
-
+export const LoginHandaler = async (data = null) => {
+    try {
+        const api = await axiosInstance();
+        const result = await api.post("/api/auth/login", {
+            email: data?.email,
+            password: data?.password
+        });
+        return result.data;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            return Promise.reject(error.response.data);
+        }
+        return Promise.reject({ message: error.message || "Something went wrong" });
+    }
+}

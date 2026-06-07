@@ -28,6 +28,7 @@ model User {
   members          GroupMember[]
   assignTracks     AssignTrack[]
   modTracks        ModTracker[]
+  aiInsight        AiInsight[]
   assignedUsers    User[]            @relation("UserAssignment")
   createdAt        DateTime          @default(now())
   updatedAt        DateTime?         @updatedAt
@@ -44,6 +45,8 @@ model Project {
   authorId          Int
   progress          Int            @default(0) // 0-100
   tasks             Task[]
+  category          String?         
+  priority          String         @default("NORMAL")
   notifications     Notification[]
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
@@ -62,6 +65,7 @@ model Task {
   duration      Int?           // in minutes or hours
   delay         Int?
   reason        String?
+  priority      String          @default("NORMAL")
   status        Status          @default(WAITING)
   note          String?
   progress      Int             @default(0)
@@ -181,6 +185,16 @@ model NotiEvidence {
    notiToken   String 
    createdAt   DateTime    @default(now())
 }
+model AiInsight {
+  id         Int      @id @default(autoincrement())
+  author     User     @relation(fields: [userId], references: [id])
+  userId     Int
+  date       String
+  content    String
+  createdAt  DateTime @default(now())
+ 
+  @@unique([userId, date])
+}
 
 enum ModType{
   PROJECT
@@ -192,6 +206,14 @@ enum Role {
   ADMIN
   MEMBER
   MANAGER
+}
+
+enum Priority{
+    LOW
+    MEDIUM
+    NORMAL
+    HIGH
+    URGENT
 }
 
 enum Status {
@@ -212,4 +234,9 @@ enum Mode {
 enum Type{
   ALERT
   REQUEST
+}
+enum Category{
+   BACKEND
+   FRONTEND
+   BOTH
 }

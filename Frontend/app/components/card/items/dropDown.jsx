@@ -17,7 +17,7 @@ export default function Dropdown({
                     placeholder={placeholder}
                     value={value}
                     editable={false}
-                    placeholderTextColor={Colors.secondary}
+                    placeholderTextColor={Colors.textSecondary}
                     style={styles.input}
                 />
             </Pressable>
@@ -37,12 +37,12 @@ export default function Dropdown({
                                     onPress={() => onSelect(item)}
                                     style={styles.dropDownItem}
                                 >
-                                    <Text style={{ color: Colors.white }}>{item.name}</Text>
+                                    <Text style={{ color: Colors.textPrimary }}>{item.name}</Text>
                                 </Pressable>
                             )}
                         />
                     ) : (
-                        <Text style={{alignSelf: "center",color: Colors.white,fontWeight: "bold"}}>No data found add first</Text>
+                        <Text style={{ alignSelf: "center", color: Colors.white, fontWeight: "bold" }}>No data found add first</Text>
                     )}
 
                 </View>
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     input: {
         borderBottomWidth: 1,
         borderColor: Colors.primary,
-        color: Colors.primary,
+        color: Colors.textPrimary,
         fontWeight: "bold",
         paddingRight: 30,
     },
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     },
     dropDown: {
         width: "100%",
-        backgroundColor: Colors.primary,
+        backgroundColor: Colors.gray,
         borderRadius: 10,
         padding: 8,
         height: 95,

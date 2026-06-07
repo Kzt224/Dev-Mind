@@ -1,0 +1,54 @@
+//pusedo code
+
+user connect(socket) =>{
+
+}
+
+
+tasks = getAllTaskByUserId() => {
+
+}
+
+summary = tasks=> filter(highPriority,nearDeadline,compeleteToday, processing task);
+
+
+ollama => {
+    if(summary){
+        Generate ONE short insight message for a task management app.
+
+        Rules:
+        - Keep under 25 words
+        - Friendly and modern tone
+        - No emojis spam
+        - Focus on urgency or productivity
+
+        Task Summary:
+        ${JSON.stringify(summary)}
+        `;
+    }else{
+        Generate ONE short insight message for a task management app.
+        Rules:
+        eg start one project for more strong skill
+    }
+}
+
+////
+Socket Connected
+      ↓
+request-daily-insight
+      ↓
+Check today's insight in DB
+      ↓
+Exists?
+ ├── YES → return existing
+ └── NO
+       ↓
+Analyze tasks
+       ↓
+Build summary
+       ↓
+Generate via Ollama
+       ↓
+Save DB
+       ↓
+Emit insight
