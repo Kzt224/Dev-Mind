@@ -15,10 +15,11 @@ export const useModalStore = create((set) => ({
     setStep: (val, data) => set({ step: val, data: data }),
     openModal: (type, id) => {
         set({
-        isVisible: true,
-        modalType: type, 
-        id: id
-    })},
+            isVisible: true,
+            modalType: type,
+            id: id
+        })
+    },
     closeModal: () => set({
         isVisible: false,
         inputData: {},
@@ -33,12 +34,16 @@ export const useModalStore = create((set) => ({
     setInputData: (key, value) => set(state => ({
         inputData: { ...state.inputData, [key]: value }
     })),
-    setEditData: (item, type) =>
+    clearInputData: () => set({
+        inputData: {}
+    }),
+    setEditData: (item, type) => {
         set(state => ({
             ...state,
             editProject: type === "project" ? item : state.editProject,
             editTask: type === "task" ? item : state.editTask,
-        })),
+        }))
+    },
     setInviteData: (id) => set({ groupId: id }),
     setQrToken: (val, groupId) => set({ qrToken: val, groupId: groupId })
 }));

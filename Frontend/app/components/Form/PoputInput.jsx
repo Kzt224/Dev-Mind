@@ -6,7 +6,7 @@ import ProjectForm from "./ProjectForm.jsx";
 import TaskForm from "./TaskForm.jsx";
 import { AuthContext } from "@/app/hook/authContex";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { assignTaskToUser, createGroup, createProject, createTask, generateInvite, joinGroup, updateProject, updateTask } from "@/assets/api/fetchData";
+import { assignTaskToUser, groupLeftRequest, createGroup, createProject, createTask, generateInvite, joinGroup, updateProject, updateTask } from "@/assets/api/fetchData";
 import ProjectEditForm from "./ProjectEditForm.jsx";
 import InviteForm from "./InviteForm.jsx";
 import TaskEditForm from "./TaskEditForm.jsx";
@@ -16,8 +16,12 @@ import { dvmBtn, shadowStyles } from "@/assets/themes/style.js";
 import JoinConfirmForm from "./JoinConfirmForm.jsx";
 import { useAlertStore } from "@/assets/store/aleartStore.js";
 import AssignForm from "./AssignForm.jsx";
+import InsightDisplayForm from "./InsightDisplayForm.jsx";
+import GroupLeftForm from "./GroupLeftForm.jsx";
 export default function PopupInput() {
-    const { isVisible, closeModal, modalType, inputData, editProject, editTask, groupId, step, setStep, qrToken, id } = useModalStore();
+    const { isVisible, closeModal,
+        modalType, inputData, editProject,
+        editTask, groupId, step, setStep, qrToken, id } = useModalStore();
     const { user, cacheProject } = useContext(AuthContext);
     const queryClient = useQueryClient();
     const { setSuccess, setError } = useAlertStore();
@@ -34,7 +38,7 @@ export default function PopupInput() {
             const handler = MODAL_HANDLERS[modalType];
             queryClient.invalidateQueries(handler.invalidate);
             if (modalType === 'forInvite' || modalType === 'forInviteConfirm') {
-                setTimeout(() => setStep(2, data), 100); // remove `set(...)`
+                setTimeout(() => setStep(2, data), 100);
             } else {
                 closeModal();
             }
@@ -96,7 +100,7 @@ export default function PopupInput() {
                 data.endDate &&
                 data.progress >= editTask.progress,
             mutate: (data, editTask) =>
-                updateTask(data, editTask.id)
+                updateTask(data, id)
             ,
             invalidate: ["tasks"],
         },
@@ -134,6 +138,16 @@ export default function PopupInput() {
             validate: (data) => data.taskId && data.projectId && data.assignUserId,
             mutate: assignTaskToUser,
             invalidate: ['group']
+        },
+        forGroupLeft: {
+            buildData: (inputData) => ({
+                userName: inputData['User Name'],
+                userId: inputData["User Id"],
+                groupId: inputData['group'].groupId
+            }),
+            validate: (data) => data.groupId && data.userId,
+            mutate: groupLeftRequest,
+            invalidate: ['userInfo']
         }
     };
     const handleSubmit = () => {
@@ -143,6 +157,7 @@ export default function PopupInput() {
             return;
         }
         let data = '';
+
         if (modalType === 'forInvite') {
             data = handler.buildData(
                 id
@@ -152,7 +167,14 @@ export default function PopupInput() {
                 qrToken,
                 groupId
             )
-        } else {
+        } else if (modalType === "forGroupLeft") {
+            if (step !== 2) {
+                setStep(2, "");
+            } else {
+                data = handler.buildData(inputData);
+            }
+        }
+        else {
             data = handler.buildData(
                 inputData,
                 user,
@@ -160,12 +182,22 @@ export default function PopupInput() {
                 id
             );
         }
-        const isValid = handler.validate(data, editTask);
+        let isValid = true;
+        if (step == 2) {
+            isValid = handler.validate(data, editTask);
+        }
         if (!isValid) {
             Alert.alert("Warning", "Please fill in all fields correctly");
             return;
         }
-        mutation.mutate({ data });
+        if (modalType === "forGroupLeft") {
+            if (step == 2) {
+                mutation.mutate({ data });
+            }
+        } else {
+            mutation.mutate({ data })
+        }
+
     };
 
     const ModelComponents = {
@@ -209,6 +241,18 @@ export default function PopupInput() {
             page: <AssignForm projectList={projectList} />,
             button: "Assign",
             step2: false
+        },
+        forInsight: {
+            page: <InsightDisplayForm data={id} />,
+            step2: false,
+            done: "OK"
+        },
+        forGroupLeft: {
+            page: <GroupLeftForm />,
+            button: "Confirm",
+            step2: true,
+            step2Button: "Confirm",
+            done: "Cancel"
         }
     }
     return (
@@ -231,17 +275,29 @@ export default function PopupInput() {
                                                 {ModelComponents[modalType]?.done || "Cancle"}
                                             </Text>
                                         </Pressable>
+                                        {ModelComponents[modalType]?.step2Button && (
+                                            <Pressable style={dvmBtn['btnPrimary']} onPress={handleSubmit}>
+                                                <Text style={{ fontWeight: "bold", color: Colors.textPrimary }}>
+                                                    {ModelComponents[modalType]?.step2Button || "Confirm"}
+                                                </Text>
+                                            </Pressable>
+                                        )}
+
                                     </View>
                                 </>
                             ) : (
                                 <View style={styles.buttonContainer}>
-                                    <Pressable style={dvmBtn['btnPrimary']} onPress={handleSubmit}>
-                                        <Text style={{ fontWeight: "bold", color: "#fff" }}>
-                                            {ModelComponents[modalType]?.button}
-                                        </Text>
-                                    </Pressable>
+                                    {ModelComponents[modalType]?.button && (
+                                        <Pressable style={dvmBtn['btnPrimary']} onPress={handleSubmit}>
+                                            <Text style={{ fontWeight: "bold", color: "#fff" }}>
+                                                {ModelComponents[modalType]?.button}
+                                            </Text>
+                                        </Pressable>
+                                    )}
                                     <Pressable onPress={() => closeModal()} style={dvmBtn['btnWhite']}>
-                                        <Text style={{ fontWeight: "bold", color: Colors.textPrimary }}>Cancel</Text>
+                                        <Text style={{ fontWeight: "bold", color: Colors.textPrimary }}>
+                                            {ModelComponents[modalType]?.done ?? "Cancle"}
+                                        </Text>
                                     </Pressable>
                                 </View>
                             )}

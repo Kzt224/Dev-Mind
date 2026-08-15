@@ -8,11 +8,14 @@ import { AuthContext } from "../../../hook/authContex";
 import { getAllTask } from "../../../../assets/api/fetchData";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+import { useModalStore } from "@/assets/store/modalStore";
 
 export default function ActivityCard() {
 
     const { dailyInsight, cacheProject } = useContext(AuthContext);
     const router = useRouter();
+    const { openModal, closeModal } = useModalStore();
+
     const totalProject = cacheProject?.result?.length || 0;
     const activeProject = cacheProject?.result?.filter((p) => p.progress > 0).length || 0;
     const { data, isLoading, isError, refetch, isSuccess } = useQuery({
@@ -23,7 +26,7 @@ export default function ActivityCard() {
         if (!text) return '';
         let result = '';
         if (text.length > 60) {
-            result = text.slice(0, 70) + "...";
+            result = text.slice(0, 60) + "...";
         } else {
             result = text;
         }
@@ -49,8 +52,12 @@ export default function ActivityCard() {
                     {calculatedInsight(dailyInsight)}
                 </Text>
                 <Pressable style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                    <Text style={{ color: Colors.primary }}>Show More</Text>
-                    <AntDesign name="right" size={12} color={Colors.primary} />
+                    {dailyInsight && (
+                        <Pressable onPress={() => openModal("forInsight", dailyInsight)} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                            <Text style={{ color: Colors.primary }}>Show More</Text>
+                            <AntDesign name="right" size={12} color={Colors.primary} />
+                        </Pressable>
+                    )}
                 </Pressable>
             </View>
             {/* assigned task list */}
@@ -60,10 +67,14 @@ export default function ActivityCard() {
                 {data?.slice(0, 3)?.map((d, index) => (
                     <Text key={d?.id} style={{ color: Colors.textSecondary }}>{index + 1 + '.' + d.name}  </Text>
                 ))}
-                <Pressable onPress={() => router.push("/task")} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                    <Text style={{ color: Colors.primary }}>Show More</Text>
-                    <AntDesign name="right" size={12} color={Colors.primary} />
-                </Pressable>
+                {(data && data?.length > 0) ? (
+                    <Pressable onPress={() => router.push("/task")} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <Text style={{ color: Colors.primary }}>Show More</Text>
+                        <AntDesign name="right" size={12} color={Colors.primary} />
+                    </Pressable>
+                ) : (
+                    <Text style={{ color: Colors.primary }}>There is no tasks</Text>
+                )}
             </View>
         </>
     );

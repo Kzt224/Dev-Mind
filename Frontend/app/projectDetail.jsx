@@ -24,6 +24,8 @@ import useScrollAnimation from "./hook/animationContex.jsx";
 import { LanguageContext } from "./hook/languageContex.jsx";
 import TaskCard from "./components/card/items/TaskCard.jsx";
 import AntDesign from '@expo/vector-icons/AntDesign';
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons.js";
+
 export default function projectDetail() {
     const { openModal, closeModal, setEditData } = useModalStore();
     const { t } = useContext(LanguageContext);
@@ -49,19 +51,22 @@ export default function projectDetail() {
     const handleNavigate = () => {
         router.push("/chat");
     }
-    const handleEdit = (item, type = 'project') => {
-        openModal('editProject', item.id);
-        setEditData(item, type);
+    const gotToProjectSubDetail = () => {
+        router.push({
+            pathname: "/components/projectSubDetail",
+            params: { projectId: id }
+        })
     }
     const permission = project?.permission;
     return (
         <View style={{ flex: 1, padding: 15, backgroundColor: Colors.bgPrimary }}>
-            <Pressable onLongPress={() => setShowEditBtn(true)} style={[styles.upperContainer, customCard['cardNormal']]}>
+            <Pressable onPress={() => gotToProjectSubDetail()} style={[styles.upperContainer, customCard['cardNormal']]}>
                 <View style={{
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "space-between",
                     width: "90%",
+                    alignItems: "center"
                 }}>
                     <View style={{
                         display: "flex",
@@ -94,18 +99,10 @@ export default function projectDetail() {
                             </View>
                         </View>
                     </View>
-                    {(showEditBtn && permission?.canEdit) && (
-                        <EditButton item={project} isShake={true} handleEdit={handleEdit} />
-                    )}
+                    <View style={{ width: "10%", alignItems: "flex-end" }}>
+                        <Entypo name="chevron-right" color={Colors.textPrimary} size={30} />
+                    </View>
                 </View>
-                {/* edit close btn */}
-                {showEditBtn && (
-                    <Pressable
-                        onPress={() => setShowEditBtn(false)}
-                        style={{ position: "absolute", right: -1, top: -10, width: 24, height: 24, backgroundColor: Colors.primary, alignItems: "center", justifyContent: "center", borderRadius: 24 }}>
-                        <Entypo name="cross" size={20} color={Colors.white} />
-                    </Pressable>
-                )}
             </Pressable>
             <ScrollView onScroll={onScroll} showsVerticalScrollIndicator={false}
                 style={{ marginBottom: bottomBarHeight }}

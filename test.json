@@ -1,0 +1,38 @@
+[
+    {
+        "groupId": 16,
+        "id": 19,
+        "joinedAt": "2026-06-30T15:52:15.499Z",
+        "role": "MEMBER",
+        "user": {
+            "assignedUserId": null,
+            "createdAt": "2026-03-10T14:45:33.016Z",
+            "email": "pk@mail.com",
+            "id": 5,
+            "name": "Poe kaung lay",
+            "phone": "09666686288",
+            "role": "MEMBER",
+            "updatedAt": "2026-06-18T15:37:30.999Z",
+            "userName": "Poe Kaung"
+        },
+        "userId": 5
+    },
+    {
+        "groupId": 16,
+        "id": 18,
+        "joinedAt": "2026-06-23T15:43:49.705Z",
+        "role": "ADMIN",
+        "user": {
+            "assignedUserId": null,
+            "createdAt": "2026-06-09T14:48:57.753Z",
+            "email": "tun81541@gmail.com",
+            "id": 23,
+            "name": "Khin Zaw Htun",
+            "phone": "09672906170",
+            "role": "MEMBER",
+            "updatedAt": "2026-07-20T15:28:52.954Z",
+            "userName": "KZT"
+        },
+        "userId": 23
+    }
+]

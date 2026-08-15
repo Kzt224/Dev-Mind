@@ -37,17 +37,17 @@ export class AssignService {
             if (!project) return { status: 404, json: { message: "Project not found" } };
 
             await this.prisma.$transaction(async (tx) => {
-                await tx.assignTrack.create({
+                const created = await tx.assignTrack.create({
                     data: {
                         project: { connect: { id: Number(projectId) } },
                         task: { connect: { id: Number(taskId) } },
-                        assignUser: { connect: { id: Number(assignUserId) } }
+                        assignUser: { connect: { id: Number(assignUserId) } },
                     }
                 });
                 await tx.task.update({
-                    where: {id: Number(taskId)},
+                    where: { id: Number(taskId) },
                     data: {
-                        assignId: Number(assignUserId)
+                        assignId: Number(created?.id),
                     }
                 })
             })

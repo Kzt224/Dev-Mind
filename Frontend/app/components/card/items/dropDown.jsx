@@ -37,7 +37,7 @@ export default function Dropdown({
                                     onPress={() => onSelect(item)}
                                     style={styles.dropDownItem}
                                 >
-                                    <Text style={{ color: Colors.textPrimary }}>{item.name}</Text>
+                                    <Text style={{ color: Colors.textPrimary }}>{item.name || item?.user?.name}</Text>
                                 </Pressable>
                             )}
                         />

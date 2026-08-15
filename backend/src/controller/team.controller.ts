@@ -9,6 +9,7 @@ interface RequestwithUser extends Request {
 
 interface RequestData {
     requestId: number;
+    info: string;
     status: JoinStatus
 }
 interface TeamProp {
@@ -101,11 +102,25 @@ export class TeamController {
             return res.status(500).json({ message: "Internal server error" });
         }
     }
+    leftFromGroup = async (req: RequestwithUser, res: Response): Promise<Response> => {
+        const userId = req?.user?.userId;
+        try {
+            const data = req.body;
+            const result = await this.TeamServices.GroupLeftRequest(data, userId, req.app.get("io"));
+            return res.status(result.status).json(result.json);
+        } catch (error) {
+            logger.error("TeamController.leftFromGroup failed!", {
+                userId,
+                error
+            });
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
     sentMemberToFeedBack = async (req: RequestwithUser, res: Response): Promise<Response> => {
         const userId = req.user?.userId;
         try {
-            const { requestId, status }: RequestData = req.body;
-            const result = await this.TeamServices.sentMemberToFeedBack(userId, requestId, status, req.app.get("io"));
+            const { requestId, status, info }: RequestData = req.body;
+            const result = await this.TeamServices.sentMemberToFeedBack(userId, requestId, status, info, req.app.get("io"));
             return res.status(result.status).json(result.json);
         } catch (error) {
             logger.error("TeamController.userConnectWithInviteLink failed!", {

@@ -1,9 +1,9 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRef } from "react";
-import { Animated, Pressable } from "react-native";
+import { Animated, Pressable, Text } from "react-native";
 import { Colors } from "../../../assets/mainColor/colors";
 
-export default function DeleteButton({item,isShake,handleDelete,size}) {
+export default function DeleteButton({ item, isShake, handleDelete, size }) {
 
     const shake = useRef(new Animated.Value(0)).current;
 
@@ -15,12 +15,13 @@ export default function DeleteButton({item,isShake,handleDelete,size}) {
             ])
         ).start();
     };
-    if(isShake){
+    if (isShake) {
         startShake();
     }
     return (
-        <Pressable onPress={() => handleDelete(item)}>
+        <Pressable style={{ width: "100%", padding: 1 }} onPress={() => handleDelete(item)}>
             <Animated.View style={{
+                flexDirection: "row", gap: 10,
                 transform: [{
                     rotate: shake.interpolate({
                         inputRange: [-3, 3],
@@ -29,6 +30,7 @@ export default function DeleteButton({item,isShake,handleDelete,size}) {
                 }]
             }}>
                 <FontAwesome name="trash" size={size ? size : 30} color={Colors.danger} style={{ marginRight: 5 }} />
+                <Text style={{ color: Colors.danger, fontWeight: "bold" }}>Delete</Text>
             </Animated.View>
         </Pressable>
     );

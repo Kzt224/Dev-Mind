@@ -140,32 +140,35 @@ export default function AccountDetail() {
 
                             {Object.entries(formData)?.map(([key, value]) => (
                                 <View style={styles.info} key={key}>
-                                    <MaterialIcons
-                                        name={getSettinInfoIcon(key)}
-                                        size={24}
-                                        color={Colors.textPrimary}
-                                    />
-
-                                    <TextInput
-                                        placeholder={`Enter ${key}`}
-                                        placeholderTextColor={Colors.textSecondary}
-                                        keyboardType={key === "phone" ? "numeric" : ""}
-                                        style={[
-                                            { borderBottomColor: validateFail?.includes(key) ? Colors.danger : Colors.gray },
-                                            styles.input,
-                                        ]}
-                                        value={value != null ? value.toString() : ''}
-                                        onChangeText={(text) => {
-                                            setValidateFail([]);
-                                            setFormData(prev => {
-                                                if (prev[key] === text) return prev;
-                                                return {
-                                                    ...prev,
-                                                    [key]: text
-                                                };
-                                            });
-                                        }}
-                                    />
+                                    {key !== "id" && (
+                                        <>
+                                            <MaterialIcons
+                                                name={getSettinInfoIcon(key)}
+                                                size={24}
+                                                color={Colors.textPrimary}
+                                            />
+                                            <TextInput
+                                                placeholder={`Enter ${key}`}
+                                                placeholderTextColor={Colors.textSecondary}
+                                                keyboardType={key === "phone" ? "numeric" : ""}
+                                                style={[
+                                                    { borderBottomColor: validateFail?.includes(key) ? Colors.danger : Colors.gray },
+                                                    styles.input,
+                                                ]}
+                                                value={value != null ? value.toString() : ''}
+                                                onChangeText={(text) => {
+                                                    setValidateFail([]);
+                                                    setFormData(prev => {
+                                                        if (prev[key] === text) return prev;
+                                                        return {
+                                                            ...prev,
+                                                            [key]: text
+                                                        };
+                                                    });
+                                                }}
+                                            />
+                                        </>
+                                    )}
                                 </View>
                             ))}
 
@@ -277,13 +280,13 @@ const styles = StyleSheet.create({
     card: {
         flexDirection: "column",
         padding: 15,
-        gap: 15
+        gap: 15,
     },
     info: {
         flexDirection: "row",
         alignItems: "center",
         gap: 20,
-        width: "100%"
+        width: "100%",
     },
     input: {
         borderBottomWidth: 1,

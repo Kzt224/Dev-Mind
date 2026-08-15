@@ -11,6 +11,7 @@ import Loading from "../components/card/loading";
 import Error from "../components/card/error";
 import { usePathname, useRouter } from "expo-router";
 import { useAlertStore } from "@/assets/store/aleartStore.js";
+import { createSearchHistoryTable } from "../../assets/db/searchHistory.model";
 export const AuthContext = createContext();
 
 export default function AuthProvider({ children }) {
@@ -23,7 +24,7 @@ export default function AuthProvider({ children }) {
   const router = useRouter();
   const pathName = usePathname();
   const [fontsLoaded] = useFonts({ Inter_400Regular, Inter_700Bold });
-  const { setSuccess, setError } = useAlertStore();
+  const { setSuccess, setError, setOnlineUser } = useAlertStore();
   const [cacheToken, setToken] = useState(null);
   const [dailyInsight, setDailyInsight] = useState(null);
 
@@ -37,6 +38,7 @@ export default function AuthProvider({ children }) {
         if (!initDb) {
           await createChatsTable();
           await createMessagesTable();
+          await createSearchHistoryTable();
           await AsyncStorage.setItem("initDb", "true");
         }
 
@@ -84,6 +86,9 @@ export default function AuthProvider({ children }) {
     const socket = connectSocket(user.id, config.API_URL, cacheToken);
     socket.on("connect", () => setSuccess("You are online"));
     socket.on("disconnect", () => setError("You are offline"));
+    socket.on("online-users", (users) => {
+      if (users) setOnlineUser(users);
+    })
     socket.on("daily-insight", (data) => {
       if (data) setDailyInsight(data?.message);
     });

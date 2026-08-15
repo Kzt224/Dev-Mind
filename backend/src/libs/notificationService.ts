@@ -1,15 +1,15 @@
 import { emitNotification } from "./notiEmitter.js";
 
-interface Item{
-    header: string;
-    body: string;
-    authorId: Number;
-    projectId?: number;
-    type?: any;
-    taskId?: number | undefined;
-    requestId?: number
+interface Item {
+  header: string;
+  body: string;
+  authorId: number;
+  projectId?: number;
+  type?: any;
+  taskId?: number | undefined;
+  requestId?: number
 }
-export const createNotification = async (prisma: any, data:Item ) => {
+export const createNotification = async (prisma: any, data: Item) => {
   return await prisma.notification.create({ data });
 };
 

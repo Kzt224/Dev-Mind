@@ -9,7 +9,6 @@ export const getDate = (date) => {
 };
 export const getTaskEndDate = (date) => {
   const d = new Date(date);
-
   if (isNaN(d.getTime())) return null;
   return d.toLocaleDateString('en-GB', {
     day: 'numeric',

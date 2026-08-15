@@ -34,8 +34,8 @@ export class TaskController {
             if (!userId) {
                 return res.status(401).json({ message: "Unauthorized" });
             }
-            const taskId = Number(req.params.id);
 
+            const taskId = Number(req.params.id);
             if (isNaN(taskId)) {
                 return res.status(400).json({ message: "Invalid task id" });
             }
@@ -98,7 +98,7 @@ export class TaskController {
             if (isNaN(taskId)) {
                 return res.status(400).json({ message: "Invalid task id" });
             }
-            const result: ResponseDto = await this.TaskService.deleteTask(taskId,userId);
+            const result: ResponseDto = await this.TaskService.deleteTask(taskId, userId);
             return res.status(result.status).json(result.json);
         } catch (error) {
             logger.error("TaskController.deleteTask failed!", {

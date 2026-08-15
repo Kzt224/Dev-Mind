@@ -1,5 +1,4 @@
 import { Prisma, PrismaClient, Status } from "../../generated/prisma/index.js";
-import { Request, Response } from "express";
 import { CreateTask } from "../dto/createTask.dto.js";
 import { ResponseDto } from "../dto/response.dto.js";
 import { container } from "../container/index.js";
@@ -88,15 +87,30 @@ export class TaskService {
             const task = await this.prisma.task.findUnique({
                 where: { id: Number(id) },
                 include: {
-                    project: { select: { name: true } },
-                    assignTo: { select: { assignUser: { select: { name: true } } } },
+                    author: {
+                        select: { name: true, id: true }
+                    },
+                    project: {
+                        select: {
+                            name: true,
+                            authorId: true,
+                        }
+                    },
+                    assignTo: { select: { assignUser: { select: { name: true, id: true } } } },
                 },
             });
-
+            const isProjectOwner = task?.project?.authorId === authorId;
+            const taskOwner = task?.authorId === authorId;
+            const assignee = task?.assignTo?.assignUser?.id === authorId;
             if (!task) {
                 return { status: 404, json: { message: "Task not found!" } };
             }
-
+            const taskPermission = {
+                canEdit: isProjectOwner || taskOwner,
+                partialEdit: assignee,
+                canDelete: isProjectOwner || taskOwner,
+                isOwner: isProjectOwner || taskOwner,
+            }
             const result = {
                 name: task.name,
                 startDate: task.startDate,
@@ -109,9 +123,16 @@ export class TaskService {
                 progress: task.progress,
                 project: task.project,
                 assignTo: task.assignTo?.assignUser?.name || null,
+                assignToId: task?.assignTo?.assignUser?.id || null,
+                author: task?.author || null
             };
 
-            return { status: 200, json: result };
+            return {
+                status: 200, json: {
+                    ...result,
+                    permission: taskPermission
+                }
+            };
         } catch (error) {
             logger.error("TaskService.getTaskById failed!", {
                 userId: authorId,
@@ -125,16 +146,32 @@ export class TaskService {
     }
     async deleteTask(id: number, authorId: number): Promise<ResponseDto> {
         try {
-            const task = await this.prisma.task.findUnique({ where: { id: Number(id) }, select: { projectId: true } });
+            const task = await this.prisma.task.findUnique({
+                where: { id: Number(id) },
+                select: {
+                    projectId: true,
+                    project: {
+                        select: {
+                            authorId: true
+                        }
+                    }
+                }
+            });
             if (!task) {
                 return { status: 404, json: { message: "Task not found" } };
             }
-
-            await this.prisma.task.delete({ where: { id: Number(id) } });
-            const projectService = container.get('projectService');
-            await projectService.updateProjectProgress(task.projectId, authorId);
-
-            return { status: 200, json: { message: "Task deleted successfully!" } };
+            if (task.project?.authorId === authorId) {
+                await this.prisma.task.delete({ where: { id: Number(id) } });
+                const projectService = container.get('projectService');
+                await projectService.updateProjectProgress(task.projectId, authorId);
+                return { status: 200, json: { message: "Task deleted successfully!" } };
+            }
+            return {
+                status: 403,
+                json: {
+                    message: "Owner only can deleted task"
+                }
+            }
         } catch (error) {
             logger.error("TaskService.deleteTask failed!", {
                 userId: authorId,
@@ -146,34 +183,69 @@ export class TaskService {
             }
         }
     }
-
-    async modifyTask(id: number, data: UpdateTask, authorId: number, io: any): Promise<ResponseDto> {
+    private async updateModeTracker(tx: any, authorId: number, updated: any) {
+        try {
+            await tx.modTracker.upsert({
+                where: {
+                    updateUserId_taskId: {
+                        updateUserId: Number(authorId),
+                        taskId: updated.id,
+                    }
+                },
+                update: {
+                    updatedAt: new Date()
+                },
+                create: {
+                    type: "TASK",
+                    updateUserId: Number(authorId),
+                    taskId: updated?.id,
+                    projectId: updated?.projectId
+                }
+            });
+        } catch (error) {
+            logger.error("TaskService.updateModeTracker failed!", {
+                userId: authorId,
+                error: error
+            });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            }
+        }
+    }
+    private async modifyTaskByOwner(data: UpdateTask, task: any, authorId: number, id: number): Promise<ResponseDto> {
         try {
             const { name, reason, note, startDate, endDate, progress } = data;
-            const task = await this.prisma.task.findUnique({ where: { id: Number(id) } });
-            if (!task) {
-                return { status: 404, json: { message: "Task not found" } };
-            }
-
             if (!name && !startDate && !endDate && progress === undefined) {
                 return { status: 400, json: { message: "At least one field is required" } };
             }
             if (progress !== undefined) {
                 if (progress > 100) {
-                    return { status: 400, json: { message: "Progress cannot exceed 100" } };
+                    return {
+                        status: 400,
+                        json: {
+                            message: "Progress cannot exceed 100"
+                        }
+                    };
                 }
                 if (progress < task.progress) {
-                    return { status: 400, json: { message: "Progress cannot decrease" } };
+                    return {
+                        status: 400,
+                        json: {
+                            message: "Progress cannot decrease"
+                        }
+                    };
                 }
             }
             const start = new Date(startDate ?? task.startDate!);
             const end = new Date(endDate ?? task.endDate!);
             const durationDays = Math.ceil((end.getTime() - start?.getTime()) / (1000 * 60 * 60 * 24));
 
-            let status: Status = this.calculateProgress(data.progress ?? task.progress);
-
+            let status: Status = this.calculateProgress(progress);
+            console.log(progress);
+            console.log(status);
             const updateTask = await this.prisma.$transaction(async (tx) => {
-                const updated = await this.prisma.task.update({
+                const updated = await tx.task.update({
                     where: { id: Number(id) },
                     data: {
                         name: name ?? undefined,
@@ -186,27 +258,109 @@ export class TaskService {
                         endDate: endDate ? new Date(endDate) : undefined,
                     }
                 });
-                const modTracker = await tx.modTracker.upsert({
-                    where: { updateUserId: Number(authorId) },
-                    update: { updatedAt: new Date() },
-                    create: {
-                        type: "TASK",
-                        updateUserId: Number(authorId),
-                        project: { connect: { id: task.projectId } }
-                    }
-                });
-                const finalTask = await tx.task.update({
-                    where: { id: updated.id },
-                    data: { modifyTestId: modTracker.id }
-                });
+                await this.updateModeTracker(tx, authorId, updated);
                 const projectService = container.get('projectService');
                 await projectService.updateProjectProgress(task.projectId, authorId, tx);
-                return finalTask;
-            })
-            this.handleTaskNotifications(io, task, updateTask, authorId);
-            return { status: 200, json: { message: "Task updated successfully", data: updateTask } };
+                return updated;
+            }, {
+                maxWait: 5000,
+                timeout: 15000
+            });
+            return {
+                status: 201,
+                json: updateTask
+            };
         } catch (error) {
-            logger.error("TaskService.deleteTask failed!", {
+            logger.error("TaskService.modifyTaskByOwner failed!", {
+                userId: authorId,
+                error: error
+            });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            }
+        }
+    }
+    private async modifyTaskByAssignee(progress: number, task: any, authorId: number, id: number): Promise<ResponseDto> {
+        try {
+
+            if (progress !== undefined) {
+                if (progress > 100) {
+                    return {
+                        status: 400,
+                        json: {
+                            message: "Progress cannot exceed 100"
+                        }
+                    };
+                }
+                if (progress < task.progress) {
+
+                    return {
+                        status: 400,
+                        json: {
+                            message: "Progress cannot decrease"
+                        }
+                    };
+                }
+            }
+            let status: Status = this.calculateProgress(progress);
+            const updateTask = await this.prisma.$transaction(async (tx) => {
+                const updated = await tx.task.update({
+                    where: { id: Number(id) },
+                    data: {
+                        progress: progress !== undefined ? Number(progress) : undefined,
+                        status: status
+                    }
+                });
+                await this.updateModeTracker(tx, authorId, updated);
+                const projectService = container.get('projectService');
+                await projectService.updateProjectProgress(task.projectId, authorId, tx);
+                return updated;
+            }, {
+                maxWait: 5000,
+                timeout: 15000
+            });
+            return {
+                status: 201,
+                json: updateTask
+            };
+        } catch (error) {
+            logger.error("TaskService.modifyTaskByAssignee failed!", {
+                userId: authorId,
+                error: error
+            });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            }
+        }
+    }
+    async modifyTask(id: number, data: UpdateTask, authorId: number, io: any): Promise<ResponseDto> {
+        try {
+            const { progress } = data;
+            const task = await this.prisma.task.findUnique({
+                where: { id: Number(id) },
+                include: {
+                    project: {
+                        select: { authorId: true }
+                    }
+                }
+            });
+
+            if (!task) {
+                return { status: 404, json: { message: "Task not found" } };
+            }
+            const isOwner = task.project.authorId === authorId;
+            let result: ResponseDto;
+            if (isOwner) {
+                result = await this.modifyTaskByOwner(data, task, authorId, id);
+            } else {
+                result = await this.modifyTaskByAssignee(progress, task, authorId, id);
+            }
+            await this.handleTaskNotifications(io, task, result?.json, authorId);
+            return { status: 200, json: { message: "Task updated successfully", data: result?.json } };
+        } catch (error) {
+            logger.error("TaskService.modifyTask failed!", {
                 userId: authorId,
                 error: error
             });
@@ -217,34 +371,50 @@ export class TaskService {
         }
     }
     private calculateProgress(progress: number) {
-        if (progress === 100) return Status.DONE;
+        if (progress == 100) return Status.DONE;
         else if (progress > 0 && progress < 100) return Status.PROCESSING;
         else return Status.WAITING;
     }
+
     private async handleTaskNotifications(io: any, task: any, updateTask: any, authorId: number) {
-        if (!io) return;
-        const notiService = new SendNotification({ socketIo: io });
-        const editorId = Number(authorId);
-        const assignTrack = task.assignId ? await this.prisma.assignTrack.findUnique({ where: { id: Number(task.assignId) } }) : null;
-        const assignedUserId = assignTrack?.assignedUserId;
-        if (editorId === task.authorId && assignedUserId) {
-            await this.emitNoti(io, notiService, assignedUserId, editorId, updateTask, task.projectId);
+        try {
+            if (!io) return;
+            const notiService = new SendNotification({ socketIo: io });
+            const editorId = Number(authorId);
+            const assignTrack = task.assignId ? await this.prisma.assignTrack.findUnique({ where: { id: Number(task.assignId) } }) : null;
+            const assignedUserId = assignTrack?.assignedUserId;
+            if (editorId === task.authorId && assignedUserId) {
+                await this.emitNoti(io, notiService, assignedUserId, editorId, updateTask, task.projectId);
+            }
+            else if (assignedUserId && editorId === assignedUserId) {
+                await this.emitNoti(io, notiService, task.authorId, editorId, updateTask, task.projectId);
+            }
+        } catch (error) {
+            logger.error("TaskService.handleTaskNotification failed!", {
+                userId: authorId,
+                error: error
+            });
         }
-        else if (assignedUserId && editorId === assignedUserId) {
-            await this.emitNoti(io, notiService, task.authorId, editorId, updateTask, task.projectId);
-        }
+
     }
     private async emitNoti(io: any, service: any, recipientId: number, modifierId: number, task: any, projectId: number) {
-        const notification = await service.sendModifyNoti({
-            recipientId,
-            modifierId,
-            taskId: task.id,
-            projectId,
-            taskName: task.name,
-        });
+        try {
+            const notification = await service.sendModifyNoti({
+                recipientId,
+                modifierId,
+                taskId: task.id,
+                projectId,
+                taskName: task.name,
+            });
 
-        if (notification) {
-            io.to(`user_${recipientId}`).emit("notification", notification);
+            if (notification) {
+                io.to(`user_${recipientId}`).emit("notification", notification);
+            }
+        } catch (error) {
+            logger.error("TaskService.emitNoti failed!", {
+                userId: modifierId,
+                error: error
+            });
         }
     }
     async getTaskSummary(userId: number): Promise<ResponseDto> {
@@ -304,6 +474,44 @@ export class TaskService {
             }
         } catch (error) {
             logger.error("TaskService.getTaskSummary failed!", {
+                userId: userId,
+                error: error
+            });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            }
+        }
+    }
+    async searchTask(userId: number, query: string): Promise<any> {
+        try {
+            const task = await this.prisma.task.findMany({
+                where: {
+                    OR: [
+                        {
+                            name: {
+                                contains: query,
+                                mode: "insensitive"
+                            }
+                        },
+                        { authorId: userId },
+                        {
+                            assignTo: {
+                                assignedUserId: userId
+                            }
+                        }
+                    ]
+                }
+            });
+            if (!task) {
+                return {
+                    status: 404,
+                    json: { message: "Task not found" }
+                }
+            }
+            return task;
+        } catch (error) {
+            logger.error("TaskService.searchTask failed!", {
                 userId: userId,
                 error: error
             });

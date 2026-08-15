@@ -25,7 +25,7 @@ export default function NotiCard({ item, onRead, selected, setSelected, selectMo
         }
         setSelectMode(false);
         if (item.type !== 'REQUEST') return;
-        if(item.isAction) return;
+        if (item.isAction) return;
         const next = !expanded;
 
         Animated.timing(animation, {
@@ -63,6 +63,7 @@ export default function NotiCard({ item, onRead, selected, setSelected, selectMo
     const handleStatus = (status) => {
         const data = {
             status,
+            info: item?.info,
             requestId: item?.requestId || ''
         };
         mutation.mutate(data);
@@ -109,7 +110,7 @@ export default function NotiCard({ item, onRead, selected, setSelected, selectMo
                         <Pressable
                             disabled={item?.isAction}
                             style={[dvmBtn.btnPrimary,
-                            { backgroundColor:Colors.primary}
+                            { backgroundColor: Colors.primary }
                             ]}
                             onPress={() => handleStatus('ACCEPTED')}
                         >

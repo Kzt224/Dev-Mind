@@ -29,7 +29,7 @@ export default function BubbleChat({ message }) {
                 marginHorizontal: 10,
                 alignSelf: user ? "flex-end" : "flex-start"
             }]}>
-                <View style={{width: "85%"}}>
+                <View style={{ width: "85%" }}>
                     <Text style={{ color: Colors.textPrimary }}>{message?.text}</Text>
                 </View>
             </View>

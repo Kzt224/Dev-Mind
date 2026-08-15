@@ -38,10 +38,19 @@ export class PrepareApp {
         try {
             const allTask = await this.prisma.task.findMany({
                 where: {
-                    status:
-                    {
-                        not: "DONE"
-                    }
+                    OR: [
+                        {
+                            status: {
+                                not: "DONE"
+                            }
+                        },
+                        {
+                            progress: {
+                                not: 100
+                            }
+                        }
+                    ]
+
                 }
             });
             return allTask;

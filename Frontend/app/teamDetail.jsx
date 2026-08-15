@@ -12,6 +12,10 @@ import MemberItem from "./components/card/items/memberItem.jsx";
 import { Colors } from "../assets/mainColor/colors.js";
 import { useNavBarHeight } from "./hook/navHeighContex.jsx";
 import useScrollAnimation from "./hook/animationContex.jsx";
+import { useBottomBarHeight } from "./hook/barHeighContex.jsx";
+import { getUserById } from "@/assets/api/fetchUser.js";
+import { useAlertStore } from "../assets/store/aleartStore.js";
+
 export default function TeamDetail() {
 
     const [fontsLoaded] = useFonts({
@@ -21,20 +25,23 @@ export default function TeamDetail() {
     const { id } = useLocalSearchParams();
     const { scrollAnim, onScroll } = useScrollAnimation();
     const { user } = useContext(AuthContext);
-    const { NavBarHeight } = useNavBarHeight();
+    const { bottomBarHeight } = useBottomBarHeight();
     const { data: groupDetail, isLoading, isError, refetch } = useQuery({
         queryKey: ['member'],
         queryFn: () => getGroupMember(id),
     });
+
+    const { data: account, } = useQuery({
+        queryKey: ['userInfo', user?.id],
+        queryFn: () => getUserById(user?.id),
+        enabled: !!user?.id
+    })
+
     const member = groupDetail?.result;
     const permission = groupDetail?.permission;
 
     if (!fontsLoaded) {
         return <ActivityIndicator size="large" color="#8255F5" />;
-    }
-
-    const retry = () => {
-        refetch();
     }
     if (isLoading) {
         return (
@@ -43,18 +50,29 @@ export default function TeamDetail() {
     }
     if (isError) {
         return (
-            <Error fn={retry} />
+            <Error fn={refetch} />
         );
     }
+    const currentUser = account?.user ?? {};
+    const sortedMembers = [...member].sort((a, b) => {
+        const aMe = a.userId === currentUser.id;
+        const bMe = b.userId === currentUser.id;
+
+        if (aMe && !bMe) return -1;
+        if (!aMe && bMe) return 1;
+        if (a.role === "ADMIN" && b.role !== "ADMIN") return -1;
+        if (a.role !== "ADMIN" && b.role === "ADMIN") return 1;
+        return a.user.userName.localeCompare(b.user.userName);
+    });
     return (
         <View style={{ flex: 1, padding: 15, backgroundColor: Colors.bgPrimary }}>
-            <ScrollView style={{ marginTop: NavBarHeight }}>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom: bottomBarHeight }}>
                 <View style={styles.itemParent}>
-                    {member?.map((i) => (
+                    {sortedMembers?.map((i) => (
                         <MemberItem
                             member={i}
                             key={i.id}
-                            currentUser={user}
+                            currUser={currentUser}
                             permission={permission}
                         />
                     ))}

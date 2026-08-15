@@ -19,6 +19,7 @@ import WarningModal from "./components/card/warningModal.jsx";
 
 import { setGlobalTheme } from "@/assets/themes/theme.js";
 import { Colors } from "@/assets/mainColor/colors.js";
+import SearchForm from "./components/Form/SearchForm.jsx";
 
 export default function RootLayout() {
   const pathname = usePathname();
@@ -102,7 +103,7 @@ export default function RootLayout() {
 
                     <Stack.Screen
                       name="teamDetail"
-                      options={{ header: () => <NavBar name="Group Detail" /> }}
+                      options={{ header: () => <TopBar icon={false} greet={false} search={false} bell={false} name="Group Detail" /> }}
                     />
 
                     <Stack.Screen
@@ -125,6 +126,10 @@ export default function RootLayout() {
                       name="components/setting/language"
                       options={{ header: () => <TopBar icon={false} greet={false} search={false} bell={false} name="Language" /> }}
                     />
+                    <Stack.Screen
+                      name="components/projectSubDetail"
+                      options={{ header: () => <TopBar icon={false} greet={false} search={false} bell={false} name="Project Summary" /> }}
+                    />
                   </Stack>
 
                 </View>
@@ -133,7 +138,7 @@ export default function RootLayout() {
                 <PopupInput />
                 <SuccessModal />
                 <WarningModal />
-
+                <SearchForm />
               </DrawerProvider>
 
               {/* bottom bar */}

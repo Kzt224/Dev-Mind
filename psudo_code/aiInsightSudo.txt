@@ -52,3 +52,12 @@ Generate via Ollama
 Save DB
        ↓
 Emit insight
+
+
+userRequest = > {data, progress} 
+if(admin){
+       if(!include)
+       updateAll data and progress
+}else if(not admin){
+       update only progress,
+}

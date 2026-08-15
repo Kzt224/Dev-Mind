@@ -8,10 +8,11 @@ import { useEffect, useState } from "react";
 import { getDate } from "@/assets/helper/calculateDate.js";
 
 export default function TaskEditForm({ projectList }) {
-    const { inputData, setInputData, editTask } = useModalStore();
+    const { inputData, setInputData, editTask, id } = useModalStore();
     const [isPickerVisible, setPickerVisible] = useState(false);
     const [activeField, setActiveField] = useState(null);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [permission, setPermission] = useState(null);
     // Example projects — replace with real fetched data
     const showPicker = (field) => {
         setActiveField(field);
@@ -19,6 +20,7 @@ export default function TaskEditForm({ projectList }) {
     };
     useEffect(() => {
         if (editTask && Object.keys(editTask).length > 0) {
+            setPermission(editTask?.permission);
             setInputData("task Name", editTask.name);
             setInputData("start Date", editTask.startDate);
             setInputData("end Date", editTask.endDate);
@@ -33,6 +35,19 @@ export default function TaskEditForm({ projectList }) {
         setInputData(activeField, date.toISOString());
         hidePicker();
     };
+    const checkPermission = (permission) => {
+        let isDisable = false;
+        if (permission === undefined) return;
+        if (permission?.isOwner) {
+            return isDisable;
+        } else if (!permission?.isOwner && permission?.partialEdit) {
+            isDisable = true;
+        } else {
+            isDisable = true;
+        }
+        return isDisable;
+    }
+    const disable = checkPermission(permission);
     return (
         <>
             {["task Name", "start Date", "end Date", 'progress', "note"].map((key) => {
@@ -43,7 +58,7 @@ export default function TaskEditForm({ projectList }) {
                     <View key={key} style={{ marginBottom: 15 }}>
                         <Pressable
                             onPress={() => {
-                                if (isDateField) showPicker(key);
+                                if (isDateField && !disable) showPicker(key);
                                 if (isDropdown) setShowDropdown(!showDropdown);
                             }}
                         >
@@ -55,6 +70,8 @@ export default function TaskEditForm({ projectList }) {
                                         : String(inputData[key] ?? "")
                                 }
                                 editable={!isDateField && !isDropdown}
+                                readOnly={key != 'progress' && disable}
+                                multiline={key === 'note'}
                                 placeholderTextColor={Colors.secondary}
                                 keyboardType={key === 'progress' ? "numeric" : "default"}
                                 onChangeText={(text) => {
@@ -80,7 +97,13 @@ export default function TaskEditForm({ projectList }) {
                         {/* Calendar icon for date fields */}
                         {isDateField && (
                             <Pressable
-                                onPress={() => showPicker(key)}
+                                onPress={() => {
+                                    if (!disable) {
+                                        showPicker(key)
+                                    } else {
+                                        return '';
+                                    }
+                                }}
                                 style={{ position: "absolute", right: 0, top: 8 }}
                             >
                                 <FontAwesome name="calendar-plus-o" size={20} color={Colors.primary} />

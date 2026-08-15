@@ -11,6 +11,8 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useAlertStore } from "../../assets/store/aleartStore";
 import { useNavBarHeight } from "../hook/navHeighContex.jsx";
 import { LanguageContext } from "../hook/languageContex.jsx";
+
+
 export default function NotiFication() {
     const [fontsLoaded] = useFonts({
         Inter_400Regular,
@@ -63,6 +65,7 @@ export default function NotiFication() {
         onSuccess: (data) => {
             setSuccess(data?.message || "Deleted successfully");
             setSelected([]); // Clear selection
+            setSelectMode(false);
         },
         onError: (error, ids, context) => {
             setError(error?.message || "Delete failed");

@@ -6,12 +6,17 @@ import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import tepImage from "@/assets/images/bgImages/applogo.png";
 import { useRouter } from "expo-router";
+import { getPriorityStyles } from "../../../../assets/libs/getPriorityBg";
+import ActionButton from "../../button/actionBtn";
+import { useState } from "react";
 
 export default function ProjectCard({ data }) {
     const [fontsLoaded] = useFonts({
         Inter_400Regular,
         Inter_700Bold,
     });
+    const [activeId, setActiveId] = useState(null);
+
     if (!fontsLoaded) {
         return <ActivityIndicator size="large" color={Colors.primary} />;
     }
@@ -27,7 +32,6 @@ export default function ProjectCard({ data }) {
             return "Not Start";
         }
     }
-
     const handleNavigate = (item) => {
         if (!item) return;
 
@@ -36,62 +40,72 @@ export default function ProjectCard({ data }) {
             params: { id: JSON.parse(item.id) },
         });
     };
+    const onToggle = (id) => {
+        setActiveId(prevId => (prevId === id ? null : id));
+    }
     return (
 
         <View style={{ padding: 15 }}>
             <ScrollView>
-                {data?.map((d) => (
-                    <Pressable onPress={() => handleNavigate(d)} key={d?.id} style={[styles.itemContainer, customCard['cardNormal']]}>
-                        <View style={styles.upperContainer}>
-                            <View style={{ width: "85%" }}>
-                                <Text style={{
-                                    color: Colors.textPrimary,
-                                    fontFamily: "Inter_700Bold",
-                                    fontSize: 20,
-                                }}>{d?.name}</Text>
+                {data?.map((d) => {
+                    const { bg, text } = getPriorityStyles(d.priority);
+                    return (
+                        <Pressable onPress={() => handleNavigate(d)} key={d?.id} style={[styles.itemContainer, customCard['cardNormal']]}>
+                            <View style={styles.upperContainer}>
+                                <View style={{ width: "85%" }}>
+                                    <Text style={{
+                                        color: Colors.textPrimary,
+                                        fontFamily: "Inter_700Bold",
+                                        fontSize: 20,
+                                    }}>{d?.name}</Text>
+                                </View>
+                                {/* action button */}
+                                <ActionButton
+                                    item={d}
+                                    useFor={"project"}
+                                    activeId={activeId}
+                                    onToggle={() => onToggle(d?.id)}
+                                />
                             </View>
-                            <Pressable >
-                                <Entypo name="dots-three-vertical" size={20} color={Colors.textPrimary} />
-                            </Pressable>
-                        </View>
-                        <View style={styles.middleContainer}>
-                            <View style={styles.innerLeftConitainer}>
-                                <View style={[styles.checkContainer, {
-                                    backgroundColor: Colors.cardBlue
-                                }]}>
-                                    <Text style={{ color: Colors.primary, fontWeight: "bold" }}>Frontend</Text>
-                                </View>
-                                <View style={[styles.checkContainer, {
-                                    backgroundColor: Colors.cardRose
-                                }]}>
-                                    <Text style={{ color: Colors.tagUrgentText, fontWeight: "bold" }}>Urgent</Text>
+                            <View style={styles.middleContainer}>
+                                <View style={styles.innerLeftConitainer}>
+                                    <View style={[styles.checkContainer, {
+                                        backgroundColor: Colors.cardBlue
+                                    }]}>
+                                        <Text style={{ color: Colors.primary, fontWeight: "bold" }}>{d.category ?? "N/A"}</Text>
+                                    </View>
+                                    <View style={[styles.checkContainer, {
+                                        backgroundColor: bg
+                                    }]}>
+                                        <Text style={{ color: text, fontWeight: "bold" }}>{d.priority ?? "N/A"}</Text>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-                        <View style={styles.bottomContainer}>
-                            <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                <View style={[styles.imageContainer, { position: "relative" }]}>
-                                    <Image source={tepImage} style={{ width: 45, height: 45, borderRadius: 50 }} />
-                                </View>
-                                <View style={[styles.secondImageContainer, { left: 35 }]}>
-                                    <View style={styles.imageContainer}>
+                            <View style={styles.bottomContainer}>
+                                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                    <View style={[styles.imageContainer, { position: "relative" }]}>
                                         <Image source={tepImage} style={{ width: 45, height: 45, borderRadius: 50 }} />
                                     </View>
-                                </View>
-                                <View style={[styles.secondImageContainer, { left: 65 }]}>
-                                    <View style={[styles.imageContainer, { backgroundColor: Colors.bgPrimary }]}>
-                                        <Text style={{ color: Colors.textPrimary, alignSelf: "center" }}>5+</Text>
+                                    <View style={[styles.secondImageContainer, { left: 35 }]}>
+                                        <View style={styles.imageContainer}>
+                                            <Image source={tepImage} style={{ width: 45, height: 45, borderRadius: 50 }} />
+                                        </View>
+                                    </View>
+                                    <View style={[styles.secondImageContainer, { left: 65 }]}>
+                                        <View style={[styles.imageContainer, { backgroundColor: Colors.bgPrimary }]}>
+                                            <Text style={{ color: Colors.textPrimary, alignSelf: "center" }}>5+</Text>
+                                        </View>
                                     </View>
                                 </View>
+                                <Pressable style={[styles.checkContainer, {
+                                    backgroundColor: Colors.bgWarning
+                                }]}>
+                                    <Text style={{ color: Colors.warning, fontWeight: "bold" }}>{projectStatus(d?.progress)}</Text>
+                                </Pressable>
                             </View>
-                            <Pressable style={[styles.checkContainer, {
-                                backgroundColor: Colors.bgWarning
-                            }]}>
-                                <Text style={{ color: Colors.warning, fontWeight: "bold" }}>{projectStatus(d?.progress)}</Text>
-                            </Pressable>
-                        </View>
-                    </Pressable>
-                ))}
+                        </Pressable>
+                    );
+                })}
             </ScrollView>
         </View>
     );

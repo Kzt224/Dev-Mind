@@ -145,3 +145,322 @@ C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:43:52
              })
 
 Argument `name`: Invalid value provided. Expected String, provided Object.
+[2026-06-10T15:08:43.576Z] [ERROR] TaskService.deleteTask failed! | userId=5 error=PrismaClientKnownRequestError: 
+Invalid `tx.modTracker.upsert()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\taskServies.ts:189:56
+
+  186         endDate: endDate ? new Date(endDate) : undefined,
+  187     }
+  188 });
+→ 189 const modTracker = await tx.modTracker.upsert(
+Transaction API error: Transaction already closed: A query cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5158 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+[2026-06-10T15:08:44.605Z] [ERROR] TaskService.deleteTask failed! | userId=5 error=PrismaClientKnownRequestError: Socket timeout (the database failed to respond to a query within the configured timeout— see https://pris.ly/d/sqlite-connector for more details).
+[2026-06-10T15:08:48.465Z] [ERROR] TaskService.deleteTask failed! | userId=5 error=PrismaClientKnownRequestError: 
+Invalid `tx.modTracker.upsert()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\taskServies.ts:189:56
+
+  186         endDate: endDate ? new Date(endDate) : undefined,
+  187     }
+  188 });
+→ 189 const modTracker = await tx.modTracker.upsert(
+Transaction API error: Transaction already closed: A query cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5108 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+[2026-06-10T15:08:53.665Z] [ERROR] TaskService.deleteTask failed! | userId=5 error=PrismaClientKnownRequestError: 
+Invalid `tx.modTracker.upsert()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\taskServies.ts:189:56
+
+  186         endDate: endDate ? new Date(endDate) : undefined,
+  187     }
+  188 });
+→ 189 const modTracker = await tx.modTracker.upsert(
+Transaction API error: Transaction already closed: A query cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5111 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+[2026-06-10T15:23:43.158Z] [ERROR] TaskService.deleteTask failed! | userId=5 error=PrismaClientKnownRequestError: Transaction API error: Transaction already closed: A commit cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5281 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+[2026-06-10T15:23:57.222Z] [ERROR] TaskService.deleteTask failed! | userId=5 error=PrismaClientKnownRequestError: Transaction API error: Transaction already closed: A commit cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5295 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+[2026-06-10T15:26:49.334Z] [ERROR] TaskService.deleteTask failed! | userId=5 error=PrismaClientKnownRequestError: Transaction API error: Transaction already closed: A commit cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5259 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+[2026-06-10T15:27:54.598Z] [ERROR] ProjectService.updateProjectProgress failed! | userId=5 error=PrismaClientKnownRequestError: 
+Invalid `this.prisma.project.update()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\projectService.ts:258:39
+
+  255 
+  256 const avgProgress = Math.round(result._avg.progress ?? 0);
+  257 
+→ 258 await this.prisma.project.update(
+Socket timeout (the database failed to respond to a query within the configured timeout— see https://pris.ly/d/sqlite-connector for more details).
+[2026-06-10T15:27:54.601Z] [ERROR] TaskService.deleteTask failed! | userId=5 error=PrismaClientKnownRequestError: 
+Invalid `this.prisma.project.update()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\projectService.ts:258:39
+
+  255 
+  256 const avgProgress = Math.round(result._avg.progress ?? 0);
+  257 
+→ 258 await this.prisma.project.update(
+Socket timeout (the database failed to respond to a query within the configured timeout— see https://pris.ly/d/sqlite-connector for more details).
+[2026-06-10T15:37:39.008Z] [ERROR] ProjectService.updateProjectProgress failed! | userId=5 error=PrismaClientKnownRequestError: 
+Invalid `this.prisma.project.update()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\projectService.ts:259:39
+
+  256 
+  257 const avgProgress = Math.round(result._avg.progress ?? 0);
+  258 
+→ 259 await this.prisma.project.update(
+Socket timeout (the database failed to respond to a query within the configured timeout— see https://pris.ly/d/sqlite-connector for more details).
+[2026-06-10T15:37:39.012Z] [ERROR] TaskService.deleteTask failed! | userId=5 error=PrismaClientKnownRequestError: 
+Invalid `this.prisma.project.update()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\projectService.ts:259:39
+
+  256 
+  257 const avgProgress = Math.round(result._avg.progress ?? 0);
+  258 
+→ 259 await this.prisma.project.update(
+Socket timeout (the database failed to respond to a query within the configured timeout— see https://pris.ly/d/sqlite-connector for more details).
+[2026-06-22T15:21:23.392Z] [ERROR] TaskService.deleteTask failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.task.update()` invocation:
+
+
+Unique constraint failed on the fields: (`modifyTestId`)
+[2026-06-22T15:21:27.511Z] [ERROR] TaskService.deleteTask failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.task.update()` invocation:
+
+
+Unique constraint failed on the fields: (`modifyTestId`)
+[2026-06-22T15:22:35.980Z] [ERROR] TaskService.deleteTask failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.task.update()` invocation:
+
+
+Unique constraint failed on the fields: (`modifyTestId`)
+[2026-06-22T15:27:17.725Z] [ERROR] TaskService.modifyTask failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.task.update()` invocation:
+
+
+Unique constraint failed on the fields: (`modifyTestId`)
+[2026-06-22T15:28:28.725Z] [ERROR] TaskService.modifyTask failed! | userId=23 error=ReferenceError: Cannot access 'updateTask' before initialization
+[2026-06-22T15:29:54.881Z] [ERROR] TaskService.modifyTask failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.task.update()` invocation:
+
+
+Unique constraint failed on the fields: (`modifyTestId`)
+[2026-06-22T15:33:39.766Z] [ERROR] TaskService.modifyTask failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.task.update()` invocation:
+
+
+Unique constraint failed on the fields: (`modifyTestId`)
+[2026-06-22T15:34:49.640Z] [ERROR] TaskService.modifyTask failed! | userId=23 error=ReferenceError: Cannot access 'updateTask' before initialization
+[2026-06-22T15:35:16.786Z] [ERROR] TaskService.modifyTask failed! | userId=23 error=ReferenceError: Cannot access 'updateTask' before initialization
+[2026-06-22T15:35:43.425Z] [ERROR] TaskService.modifyTask failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.task.update()` invocation:
+
+
+Unique constraint failed on the fields: (`modifyTestId`)
+[2026-06-23T15:35:58.286Z] [ERROR] TeamService.createGroup failed! | userId=23 error=PrismaClientValidationError: 
+Invalid `this.prisma.group.create()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:43:52
+
+  40 async createGroup(userId: number, name: string) {
+  41     try {
+  42         if (!name) return { status: 400, json: { message: "Group name is required" } };
+→ 43         const result = await this.prisma.group.create({
+               data: {
+                 name: {
+                   name: "Gg"
+                 },
+                 ~~~~~~~~~~~~
+                 ownerId: 23
+               }
+             })
+
+Argument `name`: Invalid value provided. Expected String, provided Object.
+[2026-06-23T15:36:56.901Z] [ERROR] TeamService.createGroup failed! | userId=23 error=PrismaClientValidationError: 
+Invalid `this.prisma.group.create()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:44:52
+
+  41 try {
+  42     if (!name) return { status: 400, json: { message: "Group name is required" } };
+  43     console.log(name);
+→ 44     const result = await this.prisma.group.create({
+           data: {
+             name: {
+               name: "Gg"
+             },
+             ~~~~~~~~~~~~
+             ownerId: 23
+           }
+         })
+
+Argument `name`: Invalid value provided. Expected String, provided Object.
+[2026-06-23T15:39:26.958Z] [ERROR] TeamService.createGroup failed! | userId=23 error=PrismaClientValidationError: 
+Invalid `this.prisma.group.create()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:46:52
+
+  43 console.log(name);
+  44 if (!name) return { status: 400, json: { message: "Group name is required" } };
+  45 
+→ 46 const result = await this.prisma.group.create({
+       data: {
+         name: {
+           name: "Team Alpha"
+         },
+         ~~~~~~~~~~~~~~~~~~~~
+         ownerId: 23
+       }
+     })
+
+Argument `name`: Invalid value provided. Expected String, provided Object.
+[2026-06-23T15:39:52.575Z] [ERROR] TeamService.createGroup failed! | userId=23 error=PrismaClientValidationError: 
+Invalid `this.prisma.group.create()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:46:52
+
+  43 console.log(name.name);
+  44 if (!name) return { status: 400, json: { message: "Group name is required" } };
+  45 
+→ 46 const result = await this.prisma.group.create({
+       data: {
+         name: {
+           name: "Team Alpha"
+         },
+         ~~~~~~~~~~~~~~~~~~~~
+         ownerId: 23
+       }
+     })
+
+Argument `name`: Invalid value provided. Expected String, provided Object.
+[2026-06-30T15:27:31.337Z] [ERROR] Notiautomation controller.sendRequestConfirmNoti failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.notification.create()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\libs\notificationService.ts:13:36
+
+  10     requestId?: number
+  11 }
+  12 export const createNotification = async (prisma: any, data:Item ) => {
+→ 13   return await prisma.notification.create(
+Foreign key constraint violated on the foreign key
+[2026-06-30T15:29:33.852Z] [ERROR] Notiautomation controller.sendRequestConfirmNoti failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.notification.create()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\libs\notificationService.ts:13:36
+
+  10     requestId?: number
+  11 }
+  12 export const createNotification = async (prisma: any, data:Item ) => {
+→ 13   return await prisma.notification.create(
+Foreign key constraint violated on the foreign key
+[2026-06-30T15:32:47.788Z] [ERROR] Notiautomation controller.sendRequestConfirmNoti failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.notification.create()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\libs\notificationService.ts:13:36
+
+  10     requestId?: number
+  11 }
+  12 export const createNotification = async (prisma: any, data:Item ) => {
+→ 13   return await prisma.notification.create(
+Foreign key constraint violated on the foreign key
+[2026-06-30T15:44:00.069Z] [ERROR] Notiautomation controller.sendRequestConfirmNoti failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.notification.create()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\libs\notificationService.ts:19:36
+
+  16 const type: any = data?.type;
+  17 const body: string = data?.body;
+  18 logger.debug("testing group noti", { test, rId, type, body });
+→ 19 return await prisma.notification.create(
+Foreign key constraint violated on the foreign key
+[2026-06-30T15:48:50.512Z] [ERROR] Notiautomation controller.sendRequestConfirmNoti failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `prisma.notification.create()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\libs\notificationService.ts:19:36
+
+  16 const type: any = data?.type;
+  17 const body: string = data?.body;
+  18 logger.debug("testing group noti", { test, rId, type, body });
+→ 19 return await prisma.notification.create(
+Foreign key constraint violated on the foreign key
+[2026-07-02T15:05:54.222Z] [ERROR] TeamService.userConntectWithInviteLink failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `tx.task.update()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\assignService.ts:47:31
+
+  44         assignUser: { connect: { id: Number(assignUserId) } }
+  45     }
+  46 });
+→ 47 await tx.task.update(
+Foreign key constraint violated on the foreign key
+[2026-07-02T15:07:12.966Z] [ERROR] TeamService.userConntectWithInviteLink failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `tx.task.update()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\assignService.ts:50:31
+
+  47         assignUser: { connect: { id: Number(assignUserId) } }
+  48     }
+  49 });
+→ 50 await tx.task.update(
+Foreign key constraint violated on the foreign key
+[2026-07-02T15:19:11.571Z] [ERROR] TeamService.userConntectWithInviteLink failed! | userId=23 error=PrismaClientKnownRequestError: 
+Invalid `tx.task.update()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\assignService.ts:50:31
+
+  47         assignUser: { connect: { id: Number(assignUserId) } }
+  48     }
+  49 });
+→ 50 await tx.task.update(
+Foreign key constraint violated on the foreign key
+[2026-08-06T15:29:23.822Z] [ERROR] TeamService.adminGroupLeft failed! | userId=23 error=PrismaClientValidationError: 
+Invalid `tx.group.update()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:299:52
+
+  296 async adminGroupLeft(chUserId: number, gpId: number, requestLeftUserId: number, io: any) {
+  297     try {
+  298         const updateResult = await this.prisma.$transaction(async (tx) => {
+→ 299             const updateGroup = await tx.group.update({
+                    where: {
+                      id: undefined,
+                  ?   AND?: GroupWhereInput | GroupWhereInput[],
+                  ?   OR?: GroupWhereInput[],
+                  ?   NOT?: GroupWhereInput | GroupWhereInput[],
+                  ?   name?: StringFilter | String,
+                  ?   ownerId?: IntFilter | Int,
+                  ?   owner?: UserScalarRelationFilter | UserWhereInput,
+                  ?   invitations?: InvitationListRelationFilter,
+                  ?   members?: GroupMemberListRelationFilter
+                    },
+                    data: {
+                      ownerId: undefined
+                    }
+                  })
+
+Argument `where` of type GroupWhereUniqueInput needs at least one of `id` arguments. Available options are marked with ?.
+[2026-08-06T15:29:30.911Z] [ERROR] TeamService.adminGroupLeft failed! | userId=23 error=PrismaClientValidationError: 
+Invalid `tx.group.update()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:299:52
+
+  296 async adminGroupLeft(chUserId: number, gpId: number, requestLeftUserId: number, io: any) {
+  297     try {
+  298         const updateResult = await this.prisma.$transaction(async (tx) => {
+→ 299             const updateGroup = await tx.group.update({
+                    where: {
+                      id: undefined,
+                  ?   AND?: GroupWhereInput | GroupWhereInput[],
+                  ?   OR?: GroupWhereInput[],
+                  ?   NOT?: GroupWhereInput | GroupWhereInput[],
+                  ?   name?: StringFilter | String,
+                  ?   ownerId?: IntFilter | Int,
+                  ?   owner?: UserScalarRelationFilter | UserWhereInput,
+                  ?   invitations?: InvitationListRelationFilter,
+                  ?   members?: GroupMemberListRelationFilter
+                    },
+                    data: {
+                      ownerId: undefined
+                    }
+                  })
+
+Argument `where` of type GroupWhereUniqueInput needs at least one of `id` arguments. Available options are marked with ?.
+[2026-08-06T15:32:08.315Z] [ERROR] TeamService.adminGroupLeft failed! | userId=23 error=PrismaClientValidationError: 
+Invalid `tx.groupMember.update()` invocation in
+C:\Users\Dell\Desktop\AI_MENTOR\backend\src\services\teamService.ts:305:38
+
+  302         ownerId: chUserId
+  303     }
+  304 });
+→ 305 await tx.groupMember.update({
+        where: {
+          groupId_userId: {
+            groupId: 15,
+      +     userId: Int
+          }
+        },
+        data: {
+          role: "ADMIN"
+        }
+      })
+
+Argument `userId` is missing.

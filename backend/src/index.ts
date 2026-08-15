@@ -57,6 +57,9 @@ app.use("/api/data", assignRoute);
 app.use("/api/data", userRoute);
 app.use("/", configRoute);
 
+const onlineUser = new Map<number, Set<string>>();
+const disconnectTimers = new Map<number, NodeJS.Timeout>();
+
 io.on("connection", async (socket) => {
     try {
         console.log("User connected:", socket.id);
@@ -71,6 +74,16 @@ io.on("connection", async (socket) => {
             return;
         }
         socket.data.userId = result.userId;
+        const userId = result.userId;
+        if (disconnectTimers.has(userId)) {
+            clearTimeout(disconnectTimers.get(userId)!);
+            disconnectTimers.delete(userId);
+        }
+        if (!onlineUser.has(userId)) {
+            onlineUser.set(userId, new Set());
+        }
+        onlineUser.get(userId)!.add(socket.id);
+        io.emit("online-users", [...onlineUser.keys()]);
         try {
             const aiInsight = new AiInsight(socket.data.userId);
             const insight = await aiInsight.start();
@@ -83,7 +96,25 @@ io.on("connection", async (socket) => {
         }
 
         socket.on("disconnect", () => {
+            const sockets = onlineUser.get(userId);
+
+            if (sockets) {
+                sockets.delete(socket.id);
+                if (sockets?.size === 0) {
+                    disconnectTimers.set(
+                        userId,
+                        setTimeout(() => {
+                            const currentSockets = onlineUser.get(userId);
+                            if (!currentSockets || currentSockets.size === 0) {
+                                onlineUser.delete(userId);
+                                io.emit("user-offline", userId);
+                            }
+                            disconnectTimers.delete(userId);
+                        }, 10000))
+                }
+            }
             console.log("User disconnected:", socket.id);
+            io.emit("online-users", [...onlineUser.keys()]);
         });
     } catch (error) {
         console.error(error);

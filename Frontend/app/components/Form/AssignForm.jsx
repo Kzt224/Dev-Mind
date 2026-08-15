@@ -21,9 +21,9 @@ export default function AssignForm({ projectList }) {
         );
     }
     //initialize project task
-    const projectTasks = data?.result;
+    const projectTasks = data?.tasks;
     //filter project's task are not done 
-    const taskList = projectTasks?.tasks?.filter((t) => t.status !== "DONE");
+    const taskList = projectTasks?.filter((t) => t.status !== "DONE" && t.status !== "PROCESSING");
     return (
         <>
             <DropDown
@@ -51,7 +51,7 @@ export default function AssignForm({ projectList }) {
                     }
                     onSelect={(item) => {
                         setInputData("task Name", item.name);
-                        setInputData("task Id",item.id);
+                        setInputData("task Id", item.id);
                         setActiveDropdown(null);
                     }}
                 />

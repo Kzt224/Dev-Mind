@@ -1,13 +1,42 @@
 import { PrismaClient } from "../../generated/prisma/index.js";
 import { logger } from "../libs/LogGenerator.js";
+import { emitNotification } from "../libs/notiEmitter.js";
 
-interface NotiId{
+interface NotiId {
     ids: number
+}
+interface Item {
+    header: string;
+    body: string;
+    authorId: number;
+    projectId?: number;
+    type?: any;
+    taskId?: number | undefined;
+    requestId?: number
 }
 
 export class NotificationService {
     private prisma = new PrismaClient();
 
+    async createNoti(data: Item) {
+        const { authorId } = data;
+        try {
+            await this.prisma.notification.create({ data });
+            return {
+                status: 200,
+                json: "Notification was created error"
+            }
+        } catch (error) {
+            logger.error("NotificationService.createNoti failed!", {
+                userId: authorId,
+                error: error
+            })
+            return {
+                status: 500,
+                json: "Internal server error"
+            }
+        }
+    }
     async getAllNoti(userId: number) {
         try {
             const result = await this.prisma.notification.findMany({
@@ -65,12 +94,27 @@ export class NotificationService {
             }
         }
     }
-    async deleteNotification(ids:NotiId[]) {
+    async deleteNotification(ids: NotiId[]) {
         try {
             if (!ids || !Array.isArray(ids) || ids.length === 0) return { status: 400, json: { message: "Id is requied" } };
 
             await this.prisma.notification.deleteMany({ where: { id: { in: ids.map((x) => Number(x)) } } });
             return { status: 200, json: { message: "Delete notification successfully" } };
+        } catch (error) {
+            return {
+                status: 500,
+                json: "Internal server error"
+            }
+        }
+    }
+    async createAndEmitNotification(data: Item, io: any) {
+        try {
+            await this.createNoti(data);
+            await emitNotification(io, data?.authorId, {
+                header: data.header,
+                body: data.body,
+                type: data.type,
+            });
         } catch (error) {
             return {
                 status: 500,

@@ -1,5 +1,6 @@
 
 import { AssignNotificationProps, ModifyNotiProps, SendNotificationProps } from "../dto/notiController.dto.js";
+import { logger } from "../libs/LogGenerator.js";
 import { createAndEmitNotification } from "../libs/notificationService.js";
 import prisma from "../libs/prisma.js";
 
@@ -46,7 +47,10 @@ export class SendNotification {
         try {
             return await this.prisma.task.findMany({
                 where: {
-                    status: { equals: "DONE" },
+                    OR: [
+                        { status: { equals: "DONE" } },
+                        { progress: { equals: 100 } }
+                    ],
                     notifiable: { equals: false }
                 }
             });
@@ -102,6 +106,10 @@ export class SendNotification {
                 requestId: Number(this.requestId),
             });
         } catch (error) {
+            logger.error("Notiautomation controller.sendRequestConfirmNoti failed!", {
+                userId: this.memberId,
+                error: error
+            });
             console.log(error);
         }
     }

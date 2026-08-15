@@ -1,0 +1,24 @@
+[2026-06-25T15:12:10.161Z] [DEBUG] debug | test=e61a333e-0352-4eac-a386-4489694387f9
+[2026-06-30T15:03:39.723Z] [DEBUG] debug | test=a0217a65-c135-4416-bb2b-e688cf2d9c37
+[2026-06-30T15:08:08.662Z] [DEBUG] debug | test=f86c3168-0c73-4d2f-ae5c-8c072d8d2a70
+[2026-06-30T15:27:31.305Z] [DEBUG] testing group noti | test=hello
+[2026-06-30T15:29:33.829Z] [DEBUG] testing group noti | test=[object Object]
+[2026-06-30T15:32:47.767Z] [DEBUG] testing group noti | test=guest-SKQ1.210908.001 test-keys rId=8
+[2026-06-30T15:44:00.027Z] [DEBUG] testing group noti | test=guest-SKQ1.210908.001 test-keys rId=9
+[2026-06-30T15:44:00.028Z] [DEBUG] testing group noti | test=9 rId=0 type=REQUEST body=guest-SKQ1.210908.001 test-keys request to join to group!
+[2026-06-30T15:48:50.470Z] [DEBUG] testing group noti | test=guest-SKQ1.210908.001 test-keys uId=0
+[2026-06-30T15:48:50.471Z] [DEBUG] testing group noti | test=10 rId=0 type=REQUEST body=guest-SKQ1.210908.001 test-keys request to join to group!
+[2026-06-30T15:50:53.372Z] [DEBUG] testing group noti on send | test=guest-SKQ1.210908.001 test-keys uId=23
+[2026-06-30T15:50:53.373Z] [DEBUG] testing group noti | test=11 rId=23 type=REQUEST body=guest-SKQ1.210908.001 test-keys request to join to group!
+[2026-07-09T15:43:05.717Z] [DEBUG] testing | task=[object Object]
+[2026-07-09T15:43:05.719Z] [DEBUG] testing | task=[object Object]
+[2026-07-09T15:43:05.720Z] [DEBUG] testing | task=23
+[2026-07-09T15:47:29.156Z] [DEBUG] testing | task=[object Object]
+[2026-07-09T15:47:29.157Z] [DEBUG] testing | task=[object Object]
+[2026-07-09T15:47:29.158Z] [DEBUG] testing | task=23
+[2026-07-20T15:38:13.740Z] [DEBUG] debug | test=45480a9b-7485-4618-956f-a5e54459a78d
+[2026-07-22T14:49:26.436Z] [DEBUG] debug | test=83526391-5808-413a-8a5c-2c9a25fd082b
+[2026-07-27T15:30:02.919Z] [DEBUG] debug | test=3b3e6724-fdbf-4a1e-bd99-5553a4a9556d
+[2026-07-29T14:53:12.081Z] [DEBUG] debug | test=c5286faa-4dfe-4b89-9ac8-10052b29ab19
+[2026-08-05T15:32:18.800Z] [DEBUG] debug | test=cdc54555-54fe-4e12-9fac-3ed79164e6ea
+[2026-08-06T15:34:43.786Z] [DEBUG] debug | test=07b0aa3c-eaff-41ed-8c80-817cc7803b00

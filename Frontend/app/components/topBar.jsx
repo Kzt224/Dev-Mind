@@ -21,13 +21,16 @@ import { useRouter } from "expo-router";
 import { AuthContext } from "../hook/authContex";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useDrawer } from "../hook/drawercontex";
+import { useSearchStore } from "@/assets/store/searchStore";
+import { useNavBarHeight } from "../hook/navHeighContex";
+import { getUserById } from "@/assets/api/fetchUser.js";
 
 export default function TopBar({ icon, search, greet, bell, name }) {
     const router = useRouter();
     const [showSearch, setShowSearch] = useState(false);
     const { user, logout } = useContext(AuthContext);
     const { openDrawer } = useDrawer();
-
+    const { openModal, closeModal } = useSearchStore();
     const slideAnim = useRef(new Animated.Value(0)).current;
     const [fontsLoaded] = useFonts({
         Inter_400Regular,
@@ -36,9 +39,15 @@ export default function TopBar({ icon, search, greet, bell, name }) {
     });
 
     const { data: noti, isLoading, isError } = useQuery({
-        queryKey: ['notification'],
+        queryKey: ['notification', 'userInfo'],
         queryFn: () => getNotification(),
     });
+    const { data: account } = useQuery({
+        queryKey: ['userInfo', user?.id],
+        queryFn: () => getUserById(user?.id),
+        enabled: !!user?.id
+    })
+    const { setNavBarHeight } = useNavBarHeight();
 
     useEffect(() => {
         Animated.timing(slideAnim, {
@@ -63,7 +72,9 @@ export default function TopBar({ icon, search, greet, bell, name }) {
     const handleDrawer = () => openDrawer();
     const unReadCount = noti?.filter(not => !not.read).length || 0;
     return (
-        <SafeAreaView style={{ backgroundColor: Colors.bgPrimary }}>
+        <SafeAreaView style={{ backgroundColor: Colors.bgPrimary }}
+            onLayout={(e) => setNavBarHeight(e.nativeEvent.layout.height)}
+        >
             <View style={{
                 display: "flex",
                 flexDirection: "row",
@@ -86,7 +97,7 @@ export default function TopBar({ icon, search, greet, bell, name }) {
                                 color: Colors.primary,
                                 fontFamily: "Inter_700Bold",
                                 fontSize: 20,
-                            }}> Poe Kaung!</Text>
+                            }}> {(account?.user?.name).slice(0, 16)}!</Text>
                         </View>
                     )}
                     {(!icon && !greet) && (
@@ -103,11 +114,10 @@ export default function TopBar({ icon, search, greet, bell, name }) {
                             fontSize: 22,
                         }}>{name}</Text>
                     )}
-                    {/* //<SearchForm trans={slideAnim} /> */}
                 </View>
                 <View style={styles.iconBox}>
                     {search && (
-                        <Pressable onPress={() => setShowSearch(!showSearch)}>
+                        <Pressable onPress={() => openModal()}>
                             <Ionicons name="search" size={35} color={Colors.textPrimary} />
                         </Pressable>
                     )}

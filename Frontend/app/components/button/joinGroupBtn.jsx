@@ -8,7 +8,7 @@ export default function JoinGroupBtn() {
     const router = useRouter();
     return (
         <Pressable style={[customCard['cardNormal'], styles.inviteBtn]} onPress={() => router.push("/components/scanner")}>
-            <Ionicons name="scan-outline" size={30} color={Colors.textPrimary} />
+            <Ionicons name="scan-outline" size={30} color={"white"} />
         </Pressable>
     );
 }

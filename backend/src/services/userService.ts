@@ -19,6 +19,7 @@ export class UserService {
             status: 200,
             json: {
                 user: {
+                    id: result?.id,
                     name: result.name,
                     email: result.email,
                     phone: result.phone,

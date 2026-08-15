@@ -14,6 +14,7 @@ import { AuthContext } from "./hook/authContex.jsx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import { useNavBarHeight } from "./hook/navHeighContex.jsx";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function Chat() {
 
@@ -231,10 +232,9 @@ export default function Chat() {
                 <KeyboardAvoidingView
                     style={{ flex: 1 }}
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardVerticalOffset={NavBarHeight}
                 >
-
                     <FlatList
-                        style={{marginTop: NavBarHeight}}
                         showsVerticalScrollIndicator={false}
                         data={messages}
                         inverted
@@ -250,11 +250,8 @@ export default function Chat() {
                             <Text style={{ color: Colors.textSecondary }}>AI is typing...</Text>
                         </View>
                     )}
-
                     <ChatInput onSend={handleSend} disabled={isStreaming} />
-
                 </KeyboardAvoidingView>
-
             </SafeAreaView>
 
         </>
@@ -268,5 +265,5 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 10,
         backgroundColor: Colors.bgPrimary
-    }
+    },
 });

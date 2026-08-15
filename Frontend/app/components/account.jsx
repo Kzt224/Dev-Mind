@@ -15,6 +15,7 @@ import Loading from "./card/loading";
 import { getUserById } from "@/assets/api/fetchUser.js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LanguageContext } from "../hook/languageContex";
+
 export default function Account() {
 
   const { user, logout } = useContext(AuthContext);

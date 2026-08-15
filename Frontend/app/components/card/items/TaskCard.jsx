@@ -7,10 +7,12 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts, Inter_400Regular, Inter_700Bold } from "@expo-google-fonts/inter";
 import { customCard } from "../../../../assets/themes/style";
 import { useRouter } from "expo-router";
+import ActionButton from "../../button/actionBtn";
+import { useState } from "react";
 
 
 export default function TaskCard({ data }) {
-
+    const [activeId, setActiveId] = useState(null);
     const [fontsLoaded] = useFonts({
         Inter_400Regular,
         Inter_700Bold,
@@ -28,6 +30,19 @@ export default function TaskCard({ data }) {
             params: { id: JSON.parse(item.id) },
         });
     };
+    const onToggle = (id) => {
+        setActiveId(prevId => (prevId === id ? null : id));
+    }
+    const calculatedText = (text) => {
+        if (!text) return '';
+        let result = '';
+        if (text.length > 27) {
+            result = text.slice(0, 27) + "...";
+        } else {
+            result = text;
+        }
+        return result;
+    }
     return (
         <View >
             {data.map((d) => (
@@ -37,8 +52,14 @@ export default function TaskCard({ data }) {
                             color: Colors.textPrimary,
                             fontFamily: "Inter_700Bold",
                             fontSize: 20,
-                        }}>{d?.name}</Text>
-                        <Entypo name="dots-three-vertical" size={20} color={Colors.textPrimary} />
+                        }}>{calculatedText(d?.name)}</Text>
+                        {/* action button */}
+                        <ActionButton
+                            useFor={"task"}
+                            item={d}
+                            activeId={activeId}
+                            onToggle={() => onToggle(d?.id)}
+                        />
                     </View>
                     <View style={styles.middleContainer}>
                         <View style={styles.innerLeftConitainer}>

@@ -89,8 +89,9 @@ export default function Item({ data, useFor }) {
     };
 
     const handleDelete = (item) => {
-        if (!item) return;
-        mutate(item.id);
+        console.log(item)
+        // if (!item) return;
+        // mutate(item.id);
     };
 
     return (

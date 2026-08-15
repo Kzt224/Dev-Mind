@@ -1,7 +1,8 @@
-import { JoinStatus, PrismaClient } from "../../generated/prisma/index.js";
+import { Group, JoinStatus, PrismaClient } from "../../generated/prisma/index.js";
 import { SendNotification } from "../controller/notiAutoMation.controller.js";
 import { logger } from "../libs/LogGenerator.js";
 import { v4 as uuidv4 } from 'uuid';
+import { NotificationService } from "./notificationService.js";
 
 interface ReturnGroup {
     id: number;
@@ -12,6 +13,21 @@ interface ReturnGroup {
 class RequestData {
     groupId!: number;
     qrToken!: string
+}
+class groupData {
+    name!: string;
+}
+class groupLeftRequest {
+    changeUserId!: number;
+    groupId!: number;
+    requestUserName!: string
+}
+interface notiData {
+    header: string,
+    body: string,
+    authorId: number,
+    info?: string,
+    type: any
 }
 
 interface NotificationPayload {
@@ -37,13 +53,13 @@ interface SocketEmitPayload {
 export class TeamService {
     private prisma = new PrismaClient();
 
-    async createGroup(userId: number, name: string) {
+    async createGroup(userId: number, data: Group) {
         try {
+            const { name } = data;
             if (!name) return { status: 400, json: { message: "Group name is required" } };
             const result = await this.prisma.group.create({
                 data: { name, ownerId: Number(userId) },
             });
-
             if (result) {
                 await this.prisma.groupMember.create({
                     data: { groupId: Number(result.id), userId: Number(result.ownerId), role: "ADMIN" },
@@ -140,10 +156,18 @@ export class TeamService {
                     where: { id: existingInvitation.id },
                     data: { token, expiresAt },
                 });
+                const test = updated?.token;
+                logger.debug("debug", {
+                    test
+                });
                 return { status: 200, json: { token: updated.token } };
             }
             const created = await this.prisma.invitation.create({
                 data: { groupId: groupId, leaderId: userId, token, expiresAt },
+            });
+            const test = created?.token;
+            logger.debug("debug", {
+                test
             });
             return { status: 200, json: { token: created.token } };
         } catch (error) {
@@ -234,17 +258,197 @@ export class TeamService {
             }
         }
     }
-
-    async sentMemberToFeedBack(userId: number, requestId: number, status: JoinStatus, io: any) {
+    async GroupLeftRequest(data: groupLeftRequest, userId: number, io: any) {
         try {
-            if (!requestId || !status) return { status: 400, json: { message: "Invalid request data" } };
-
-            const joinRequest = await this.prisma.joinRequest.findUnique({ where: { id: Number(requestId) } });
-            if (!joinRequest) return { status: 404, json: { message: "Join request not found" } };
-            if (joinRequest.joinStatus === status) {
-                return { status: 200, json: { message: "Status already updated" } };
+            const { changeUserId, groupId, requestUserName } = data;
+            const groupResult = await this.prisma.groupMember.findFirst({
+                where: {
+                    AND: [
+                        { groupId: groupId },
+                        { userId: userId }
+                    ]
+                }
+            });
+            if (!groupResult) {
+                return {
+                    status: 404,
+                    json: "You are not in this group.Try again!"
+                }
             }
-            await this.prisma.joinRequest.update({ where: { id: joinRequest.id }, data: { joinStatus: status, retryAt: null } });
+            if (groupResult?.role === "ADMIN") {
+                await this.adminGroupLeft(changeUserId, groupId, userId, io)
+            } else {
+                await this.userGroupLeft(userId, groupId, requestUserName, io)
+            }
+            return {
+                status: 200,
+                json: { message: "Group left request was sent." }
+            }
+        } catch (error) {
+            logger.error("TeamService.groupLeftRequest failed!", {
+                userId: userId,
+                error: error
+            });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            }
+        }
+    }
+    async adminGroupLeft(chUserId: number, gpId: number, requestLeftUserId: number, io: any) {
+        try {
+            const updateResult = await this.prisma.$transaction(async (tx) => {
+                const updateGroup = await tx.group.update({
+                    where: { id: gpId },
+                    data: {
+                        ownerId: chUserId
+                    }
+                });
+                await tx.groupMember.update({
+                    where: {
+                        groupId_userId: {
+                            groupId: gpId,
+                            userId: chUserId
+                        }
+                    },
+                    data: {
+                        role: "ADMIN"
+                    }
+                })
+                await tx.groupMember.delete({
+                    where: {
+                        groupId_userId: {
+                            groupId: gpId,
+                            userId: requestLeftUserId
+                        }
+                    }
+                });
+                return updateGroup;
+            });
+            const leftUserData: notiData = {
+                header: "Alert!",
+                body: `You was left from ${updateResult?.name} group successfully!`,
+                authorId: requestLeftUserId,
+                type: "ALERT",
+            }
+            const newAdminData: notiData = {
+                header: "Congratulation!",
+                body: `You was become admin of ${updateResult.name} group`,
+                authorId: chUserId,
+                type: "ALERT"
+            }
+            const noti = new NotificationService();
+            await noti.createAndEmitNotification(leftUserData, io);
+            await noti.createAndEmitNotification(newAdminData, io);
+            return {
+                status: 200,
+                json: { message: "You was left from group successsully" }
+            }
+        } catch (error) {
+            logger.error("TeamService.adminGroupLeft failed!", {
+                userId: requestLeftUserId,
+                error: error
+            });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            }
+        }
+    }
+    async userGroupLeft(userId: number, groupId: number, reqUserName: string, io: any) {
+        try {
+            const groupAdmin = await this.prisma.group.findFirst({
+                where: { id: groupId },
+                select: { ownerId: true }
+            })
+            if (!groupAdmin) {
+                return;
+            }
+            await this.prisma.joinRequest.create({
+                data: {
+                    groupId,
+                    userId,
+                    info: 'LEFT',
+                    joinStatus: "PENDING"
+                }
+            });
+            const adminNoti: notiData = {
+                header: `Alert user ${reqUserName} was reqest to leave group`,
+                body: "I wanna left from group so my assign task to take back",
+                authorId: groupAdmin?.ownerId,
+                info: "LEFT",
+                type: "REQUEST"
+            }
+            const noti = new NotificationService();
+            await noti.createAndEmitNotification(adminNoti, io);
+            return {
+                status: 200,
+                json: { message: "You was request to left group successsully" }
+            }
+        } catch (error) {
+            logger.error("TeamService.groupLeftRequest failed!", {
+                userId: userId,
+                error: error
+            });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            }
+        }
+    }
+    async handleAcceptLeftGroup(requestId: number, joinRequest: any, status: string, io: any) {
+        try {
+            if (status === "ACCEPTED") {
+                await this.prisma.$transaction(async (tx) => {
+                    const admin = await tx.group.findUnique({
+                        where: { id: joinRequest?.groupId },
+                        select: { ownerId: true }
+                    })
+                    await tx.task.updateMany({
+                        where: {
+                            groupId: joinRequest.groupId,
+                            assignedUserId: joinRequest.userId,
+                            status: {
+                                not: "DONE",
+                            },
+                        },
+                        data: {
+                            assignedUserId: admin?.ownerId,
+                        },
+                    });
+                    await tx.groupMember.delete({
+                        where: {
+                            groupId_userId: {
+                                groupId: joinRequest.groupId,
+                                userId: joinRequest.userId
+                            }
+                        }
+                    });
+                    await tx.joinRequest.update({
+                        where: {
+                            id: requestId
+                        },
+                        data: {
+                            joinStatus: "ACCEPTED"
+                        }
+                    });
+                });
+                const leftNoti: notiData = {
+                    header: `Alert!`,
+                    body: "You was successfully left from grup.",
+                    authorId: joinRequest.userId,
+                    info: "LEFT",
+                    type: "ALERT"
+                }
+                const noti = new NotificationService()
+                await noti.createAndEmitNotification(leftNoti, io);
+            }
+        } catch (error) {
+
+        }
+    }
+    async handleAcceptedJoinGroup(requestId: number, joinRequest: any, status: string, io: any) {
+        try {
             if (status === "ACCEPTED") {
                 await this.prisma.groupMember.upsert({
                     where: { groupId_userId: { groupId: joinRequest.groupId, userId: joinRequest.userId } },
@@ -256,19 +460,43 @@ export class TeamService {
                     where: { requestId: Number(requestId) },
                     data: { isAction: true },
                 });
-            } else {
-                //
+                await this.emitNoti({
+                    receiverId: joinRequest.userId,
+                    requestId: joinRequest.id,
+                    inviteStatus: status,
+                    type: "REQUEST"
+                }, io);
             }
-            await this.emitNoti({
-                receiverId: joinRequest.userId,
-                requestId: joinRequest.id,
-                inviteStatus: status,
-                type: "REQUEST"
-            }, io);
+        } catch (error) {
+            logger.error("TeamService.handleAcceptedJoinGroup failed!", {
+                userId: requestId,
+                error: error
+            });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            }
+        }
+    }
+    async sentMemberToFeedBack(userId: number, requestId: number, status: JoinStatus, info: string, io: any) {
+        try {
+            if (!requestId || !status) return { status: 400, json: { message: "Invalid request data" } };
+
+            const joinRequest = await this.prisma.joinRequest.findUnique({ where: { id: Number(requestId) } });
+            if (!joinRequest) return { status: 404, json: { message: "Join request not found" } };
+            if (joinRequest.joinStatus === status) {
+                return { status: 200, json: { message: "Status already updated" } };
+            }
+            await this.prisma.joinRequest.update({ where: { id: joinRequest.id }, data: { joinStatus: status, retryAt: null } });
+            if (info === "JOIN") {
+                await this.handleAcceptedJoinGroup(requestId, joinRequest, status, io)
+            } else {
+                await this.handleAcceptLeftGroup(requestId, joinRequest, status, io)
+            }
             return {
                 status: 200,
                 json: {
-                    message: status === "ACCEPTED" ? "User accepted and added to group" : "User request rejected",
+                    message: status === "ACCEPTED" ? "Accepted the user request" : "User request rejected",
                 },
             };
         } catch (error) {
@@ -287,6 +515,7 @@ export class TeamService {
 
             const noti = new SendNotification({
                 memberId: payload.receiverId,
+                leaderId: payload.receiverId,
                 requestId: payload.requestId,
                 inviteStatus: payload.inviteStatus
             });
@@ -326,6 +555,39 @@ export class TeamService {
             console.error("Error sending notification:", error);
         }
     }
+    async searchMember(userId: number, query: string): Promise<object> {
+        try {
+            const members = await this.prisma.groupMember.findMany({
+                where: {
+                    OR: [
+                        {
+                            user: {
+                                userName: {
+                                    contains: query,
+                                    mode: "insensitive"
+                                },
+                            }
+                        },
+                        { userId: userId }
+                    ]
+                }
+            });
+            if (!members) {
+                return {
+                    status: 404,
+                    json: { message: "Member not found" }
+                }
+            }
+            return members;
+        } catch (error) {
+            logger.error("TeamService.searchMember failed!", {
+                userId: userId,
+                error: error
+            });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            }
+        }
+    }
 }
-// note
-// tomorrow create task controller.ts and task.route.ts

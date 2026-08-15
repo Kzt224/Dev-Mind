@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         gap: 15,
-        padding: 5
+        padding: 5,
     },
     input: {
         backgroundColor: Colors.white,

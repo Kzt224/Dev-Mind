@@ -53,7 +53,7 @@ model Project {
   mode              String         @default("SINGLE")
   assignTo          AssignTrack?    @relation("projectAssign",fields: [assignId],references: [id])
   assignId          Int?            @unique  
-  modTrack          ModTracker?     @relation("projectModTrack",fields: [modifyProjectId],references: [id])
+  modTrack          ModTracker[]    
   modifyProjectId   Int?            @unique
   }
 
@@ -77,8 +77,7 @@ model Task {
   notifiable    Boolean         @default(false)
   assignTo      AssignTrack?    @relation("taskAssign",fields: [assignId],references: [id])
   assignId      Int?            @unique 
-  modTrack      ModTracker?     @relation("taskModTrack",fields: [modifyTestId],references: [id])
-  modifyTestId  Int?            @unique
+  modTrackers      ModTracker[]          
   createdAt     DateTime        @default(now())
   updatedAt     DateTime?       @updatedAt
 }
@@ -86,11 +85,14 @@ model  ModTracker {
      id                   Int             @id @default(autoincrement())
      type                 String       
      user                 User            @relation(fields:[updateUserId], references: [id])
-     updateUserId         Int             @unique    
-     task                 Task?           @relation("taskModTrack")
-     project              Project?        @relation("projectModTrack")
+     updateUserId         Int                
+     task                 Task?           @relation(fields: [taskId], references: [id])
+     taskId               Int?
+     project              Project?        @relation(fields: [projectId], references: [id])
+     projectId   Int?
      updatedAt            DateTime        @default(now()) 
      createdAt            DateTime        @default(now())
+    @@unique([updateUserId, taskId])
 }
 model AssignTrack {
     id               Int          @id @default(autoincrement())
@@ -157,6 +159,7 @@ model JoinRequest {
   id            Int           @id @default(autoincrement())
   groupId       Int
   userId        Int
+  info          Info        @default(JOIN)
   joinStatus    JoinStatus    @default(PENDING)  
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -215,7 +218,10 @@ enum Priority{
     HIGH
     URGENT
 }
-
+enum Info{
+   JOIN
+   LEFT
+}
 enum Status {
   PROCESSING
   WAITING

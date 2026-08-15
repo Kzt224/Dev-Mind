@@ -1,11 +1,10 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRef } from "react";
-import { Animated, Pressable } from "react-native";
+import { Animated, Pressable, Text } from "react-native";
 import { Colors } from "../../../assets/mainColor/colors";
 
 
-
-export default function EditButton({item,isShake,handleEdit,size}) {
+export default function EditButton({ item, isShake, handleEdit, size }) {
 
     const shake = useRef(new Animated.Value(0)).current;
 
@@ -17,12 +16,14 @@ export default function EditButton({item,isShake,handleEdit,size}) {
             ])
         ).start();
     };
-    if(isShake){
+    if (isShake) {
         startShake();
     }
     return (
-        <Pressable onPress={() => handleEdit(item)}>
+        <Pressable style={{ width: "100%", padding: 1 }} onPress={() => handleEdit(item)}>
             <Animated.View style={{
+                flexDirection: "row",
+                gap: 5,
                 transform: [{
                     rotate: shake.interpolate({
                         inputRange: [-3, 3],
@@ -31,6 +32,7 @@ export default function EditButton({item,isShake,handleEdit,size}) {
                 }]
             }}>
                 <FontAwesome name="edit" size={size ? size : 30} color={Colors.warning} style={{ marginRight: 5 }} />
+                <Text style={{ color: Colors.warning, fontWeight: "bold" }}>Edit</Text>
             </Animated.View>
         </Pressable>
     );

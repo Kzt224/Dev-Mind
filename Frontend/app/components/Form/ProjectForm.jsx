@@ -37,14 +37,14 @@ export default function ProjectForm() {
             <Dropdown
               key={index}
               placeholder={placeholderText}
-              value={inputData[key]} // Dynamically looks up inputData["priority"] or inputData["category"]
+              value={inputData[key]}
               data={dropdownData}
-              visible={activeDropdown === key} // Checks if this specific dropdown is active
+              visible={activeDropdown === key}
               onToggle={() =>
                 setActiveDropdown(activeDropdown === key ? null : key)
               }
               onSelect={(item) => {
-                setInputData(key, item.name); // Updates the correct field dynamically
+                setInputData(key, item.name);
                 setActiveDropdown(null);
               }}
             />

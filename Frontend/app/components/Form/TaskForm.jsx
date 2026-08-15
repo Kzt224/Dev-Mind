@@ -4,10 +4,11 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Colors } from "@/assets/mainColor/colors";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { usePathname } from "expo-router";
 import { LanguageContext } from "@/app/hook/languageContex";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Dropdown from "../card/items/dropDown";
 
 export default function TaskForm() {
   const { inputData, setInputData } = useModalStore();
@@ -17,23 +18,27 @@ export default function TaskForm() {
   const pathName = usePathname();
   const { t } = useContext(LanguageContext);
   const [projectList, setProjectList] = useState(null);
+
+  useEffect(() => {
+    const fetchCacheProject = async () => {
+      const project = await AsyncStorage.getItem('Projects');
+      setProjectList(JSON.parse(project));
+    }
+    fetchCacheProject();
+  }, []);
+
   const showPicker = (field) => {
     setActiveField(field);
     setPickerVisible(true);
   };
-  const handleDropdown = async () => {
-    const project = await AsyncStorage.getItem('Projects');
-    setProjectList(JSON.parse(project));
-  }
 
   const hidePicker = () => setPickerVisible(false);
-
   const handleConfirm = (date) => {
-    setShowDropdown(!showDropdown);
     setInputData(activeField, date.toLocaleDateString());
     hidePicker();
   };
   const cacheProject = projectList?.result;
+
   return (
     <>
       {["Project Name", "task Name", "start Date", "end Date", "note"].map((key) => {
@@ -41,6 +46,23 @@ export default function TaskForm() {
         const isDropdown = key === "Project Name";
         const isOnProjectDetail = key === 'Project Name' && pathName === '/projectDetail';
         if (isOnProjectDetail) return null;
+        if (isDropdown) {
+          return (
+            <Dropdown
+              key={key}
+              placeholder={"Project Name"}
+              value={inputData[key]}
+              data={cacheProject}
+              visible={showDropdown}
+              onToggle={() => setShowDropdown(!showDropdown)}
+              onSelect={(item) => {
+                setInputData("Project Name", item.name);
+                setInputData("Project Id", item.id)
+                setShowDropdown(false);
+              }}
+            />
+          );
+        }
         return (
           <View key={key} style={{ marginBottom: 15 }}>
             <Pressable
@@ -58,13 +80,12 @@ export default function TaskForm() {
                 style={{
                   borderBottomWidth: 1,
                   borderColor: Colors.primary,
-                  color: Colors.primary,
+                  color: Colors.textPrimary,
                   fontWeight: "bold",
                   paddingRight: isDateField || isDropdown ? 30 : 0,
                 }}
               />
             </Pressable>
-
             {/* Calendar icon for date fields */}
             {isDateField && (
               <Pressable
@@ -74,46 +95,9 @@ export default function TaskForm() {
                 <FontAwesome name="calendar-plus-o" size={20} color={Colors.primary} />
               </Pressable>
             )}
-
-            {/* Dropdown icon for project field */}
-            {isDropdown && (
-              <Pressable
-                onPress={handleDropdown}
-                style={{ position: "absolute", right: 0, top: 8 }}
-              >
-                <AntDesign name="caret-down" size={20} color={Colors.primary} />
-              </Pressable>
-            )}
           </View>
         );
       })}
-
-      {/* Custom Dropdown List */}
-      {showDropdown && (
-        <View style={styles.dropDown}>
-          {pathName !== '/projectDetail' && (
-            <FlatList
-              data={cacheProject}
-              style={{ maxHeight: 100 }}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <Pressable
-                  onPress={() => {
-                    setInputData("Project Name", item.name);
-                    setInputData("Project Id", item.id)
-                    setShowDropdown(false);
-                  }}
-                  style={styles.dropDownItem}
-                >
-                  <Text style={{ color: Colors.white }}>{item.name}</Text>
-                </Pressable>
-              )}
-            />
-          )}
-
-        </View>
-      )}
-
       {/* Date Picker */}
       <DateTimePickerModal
         isVisible={isPickerVisible}

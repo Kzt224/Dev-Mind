@@ -1,8 +1,18 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { axiosInstance } from "./axios.js";
 import { registerPushToken } from "../notification/notiToken.js";
-import axios from "axios";
+import axios, { Axios } from "axios";
 
+
+const getToken = async () => {
+    try {
+        const token = await AsyncStorage.getItem("Token");
+        const api = new axiosInstance();
+        return { token, api };
+    } catch (error) {
+        return '';
+    }
+}
 /********Project API start ***** */
 export const getAllProject = async () => {
     try {
@@ -344,7 +354,8 @@ export const sendGroupJoinFeekback = async (data) => {
         const response = await api.post(`/api/data/group/acceptOrReject`,
             {
                 requestId: data?.requestId,
-                status: data?.status
+                status: data?.status,
+                info: data?.info
             },
             {
                 headers: {
@@ -369,6 +380,26 @@ export const assignTaskToUser = async (data) => {
                 projectId: data?.projectId,
                 taskId: taskId,
                 assignUserId: data?.assignUserId
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+export const groupLeftRequest = async (data) => {
+    try {
+        const token = await AsyncStorage.getItem('Token');
+        const api = await axiosInstance();
+        const response = await api.post(`/api/data/group/leftgroup`,
+            {
+                changeUserId: data?.userId,
+                groupId: data?.groupId,
+                userName: data?.userName
             },
             {
                 headers: {
