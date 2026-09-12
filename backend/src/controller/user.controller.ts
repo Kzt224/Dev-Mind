@@ -1,3 +1,4 @@
+import cloudinary from "../libs/cloudinary.cfg.js";
 import { UserService } from "../services/userService.js";
 import { Request, Response } from "express";
 
@@ -33,7 +34,6 @@ export class UserController {
     updatePassword = async (req: RequestwithUser, res: Response): Promise<Response> => {
         try {
             const userId = req.user?.userId || 0;
-            console.log(req.user?.userId);
             const result = await this.userService.updatePassword(userId, req.body.password, req.app.get("io"));
             return res.status(result.status).json(result.json);
         } catch (error) {
@@ -41,4 +41,29 @@ export class UserController {
             return res.status(500).json({ message: "Internal server error" });
         }
     };
+    getUploadSignature = async (req: RequestwithUser, res: Response): Promise<Response> => {
+        try {
+            const userId = req?.user?.userId;
+            if (!userId) return res.status(403).json({ message: "Forbridden" });
+            const result = await this.userService.getSignature(userId);
+            return res.status(result.status).json(result.json);
+        } catch (error) {
+            console.log("Error on getUploadSignature password", error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+    uploadProfilePicture = async (req: RequestwithUser, res: Response): Promise<Response> => {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                return res.status(402).json("Unauthorize");
+            }
+            const { imageName, imageUrl } = req.body;
+            const result = await this.userService.uploadProfile(imageUrl, userId);
+            return res.status(result.status).json(result.json);
+        } catch (error) {
+            console.log("Error on update password", error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
 }

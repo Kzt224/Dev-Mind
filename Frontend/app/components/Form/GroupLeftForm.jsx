@@ -53,7 +53,7 @@ export default function GroupLeftForm() {
                 </View>
             )}
             {(step === 2 && !isAdmin) && (
-                <Text style={{ color: Colors.textPrimary, fontWeight: "bold" }}>You are unfinished assigned task</Text>
+                <Text style={{ color: Colors.textPrimary, fontWeight: "bold" }}>You are unfinished assigned task?. So requset to admin for take back assigned task.?</Text>
             )}
         </View>
     );

@@ -2,21 +2,16 @@ import { Stack, usePathname } from "expo-router";
 import { View, Appearance } from "react-native";
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-import NavBar from "./components/navbar.jsx";
 import TopBar from "./components/topBar.jsx";
 import Bar from "./components/bar.jsx";
 import PopupInput from "./components/Form/PoputInput.jsx";
-
 import DrawerProvider from "./hook/drawercontex.jsx";
 import BottomBarHeightProvider from "./hook/barHeighContex.jsx";
 import NavBarHeightProvider from "./hook/navHeighContex.jsx";
 import AuthProvider from "./hook/authContex.jsx";
 import LanguageProvider from "./hook/languageContex.jsx";
-
 import SuccessModal from "./components/card/successModal.jsx";
 import WarningModal from "./components/card/warningModal.jsx";
-
 import { setGlobalTheme } from "@/assets/themes/theme.js";
 import { Colors } from "@/assets/mainColor/colors.js";
 import SearchForm from "./components/Form/SearchForm.jsx";

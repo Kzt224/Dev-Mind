@@ -140,7 +140,7 @@ export default function AccountDetail() {
 
                             {Object.entries(formData)?.map(([key, value]) => (
                                 <View style={styles.info} key={key}>
-                                    {key !== "id" && (
+                                    {key !== "id" && key !== "profilePicture" && (
                                         <>
                                             <MaterialIcons
                                                 name={getSettinInfoIcon(key)}

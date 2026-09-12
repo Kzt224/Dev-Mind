@@ -1,8 +1,8 @@
-import { createAndEmitNotification } from "../../libs/notificationService.js";
+import { notiData } from "../../dto/notiData.dto.js";
 import { SendNotification } from "../notiAutoMation.controller.js";
 
-class UserNoti extends SendNotification {
-    private userId; 
+export default class UserNoti extends SendNotification {
+    private userId;
     private date;
     constructor({
         date = '',
@@ -15,25 +15,26 @@ class UserNoti extends SendNotification {
     }
     async updatePasswordNoti() {
         try {
-            await createAndEmitNotification(this.prisma, this.socketIo, {
+            const data: notiData = {
                 header: "Alert: your password has changed",
                 body: `Your password was changed on ${this.date}`,
                 authorId: this.userId
-            });
+            }
+            await this.notiService.createAndEmitNotification(data, io);
         } catch (error) {
-            console.error(`updatePasswordNoti failed for user ${this.userId}:`,error);
+            console.error(`updatePasswordNoti failed for user ${this.userId}:`, error);
         }
     }
     async updateInfoNoti() {
         try {
-            await createAndEmitNotification(this.prisma, this.socketIo, {
+            const data: notiData = {
                 header: "Alert: your information was updated",
                 body: `Your information was updated on ${this.date}`,
                 authorId: this.userId
-            });
+            }
+            await this.notiService.createAndEmitNotification(data, io);
         } catch (error) {
             console.error(`updateInfoNoti failed for user ${this.userId}:`, error);
         }
     }
 }
-export default UserNoti;

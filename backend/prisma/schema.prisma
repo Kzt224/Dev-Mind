@@ -15,6 +15,7 @@ model User {
   password         String?
   phone            String?
   userName         String?
+  profilePicture   String?
   role             Role             @default(MEMBER)
   projects         Project[]      // Projects authored by this user
   tasks            Task[]         // Tasks authored by this user
@@ -165,7 +166,7 @@ model JoinRequest {
   updatedAt     DateTime      @updatedAt
   retryAt       DateTime? 
   notification Notification[]
-  @@unique([groupId, userId])
+  @@unique([groupId, userId,info])
 }
 
 

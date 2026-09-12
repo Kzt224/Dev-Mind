@@ -21,7 +21,7 @@ export const settingList = [
         id: 3,
         name: "Theme",
         description: "Light and dark mode",
-        color: "processing",
+        color: "warning",
         icon: "dark-mode",
         bg: "processingBg",
         link: "theme"

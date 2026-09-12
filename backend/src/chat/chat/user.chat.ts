@@ -1,20 +1,12 @@
-import { Ollama } from "ollama";
 import dotenv from "dotenv";
 
 import { Request, Response } from "express";
 import { TaskService } from "../../services/taskServies.js";
 import { ProjectService } from "../../services/projectService.js";
+import { createOllamaClient } from "../vendor/ollama.js";
 
 dotenv.config();
 
-export const createOllamaClient = (): Ollama => {
-    return new Ollama({
-        host: "https://ollama.com",
-        headers: {
-            Authorization: "Bearer " + process.env.OLLAMA_API_KEY,
-        },
-    });
-};
 
 // Intent types (important for safety)
 type Intent =
@@ -27,7 +19,7 @@ type Intent =
 // CLASSIFY INTENT
 // --------------------
 const classifyIntent = async (
-    ollama: Ollama,
+    agent: any,
     content: string
 ): Promise<Intent> => {
     const prompt = `
@@ -40,7 +32,7 @@ Analyze the user input and return ONLY one of the following labels:
 User input: "${content}"
 Label:`;
 
-    const response = await ollama.generate({
+    const response = await agent.generate({
         model: "gpt-oss:120b-cloud",
         prompt,
         stream: false,
@@ -50,9 +42,6 @@ Label:`;
     return response.response.trim() as Intent;
 };
 
-// --------------------
-// MAIN CONTROLLER
-// --------------------
 export const chatWithAI = async (req: Request, res: Response) => {
     try {
         const { content } = req.query as { content?: string };
@@ -66,8 +55,8 @@ export const chatWithAI = async (req: Request, res: Response) => {
         res.setHeader("Cache-Control", "no-cache");
         res.setHeader("Connection", "keep-alive");
 
-        const ollama = createOllamaClient();
-        const intent = await classifyIntent(ollama, content);
+        const agent = await createOllamaClient();
+        const intent = await classifyIntent(agent, content);
 
         let dbContext = "";
 
@@ -113,7 +102,7 @@ Be concise, technical, and helpful.`,
             },
         ];
 
-        const response = await ollama.chat({
+        const response = await agent.chat({
             model: "gpt-oss:120b-cloud",
             messages,
             stream: true,

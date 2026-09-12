@@ -63,7 +63,6 @@ export default function NotiCard({ item, onRead, selected, setSelected, selectMo
     const handleStatus = (status) => {
         const data = {
             status,
-            info: item?.info,
             requestId: item?.requestId || ''
         };
         mutation.mutate(data);

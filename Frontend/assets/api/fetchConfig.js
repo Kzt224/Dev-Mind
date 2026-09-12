@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const URL = "http://192.168.1.50:3000/config";
+const realUrl = '';
 export const loadConfig = async () => {
     try {
         const cached = await AsyncStorage.getItem("config");

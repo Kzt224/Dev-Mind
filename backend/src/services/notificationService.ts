@@ -24,7 +24,7 @@ export class NotificationService {
             await this.prisma.notification.create({ data });
             return {
                 status: 200,
-                json: "Notification was created error"
+                json: "Notification was created",
             }
         } catch (error) {
             logger.error("NotificationService.createNoti failed!", {

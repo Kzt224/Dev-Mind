@@ -62,3 +62,43 @@ export const updatePassword = async (passw) => {
         return Promise.reject({ message: error.message || "Something went wrong" });
     }
 }
+export const getUploadSignature = async () => {
+    try {
+        const token = await AsyncStorage.getItem("Token");
+        if (!token) return;
+        const api = await axiosInstance();
+        const response = await api.get(`/api/data/user/getuploadsignature`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            return Promise.reject(error.response.data);
+        }
+        return Promise.reject({ message: error.message || "Something went wrong" });
+    }
+}
+export const uploadProfile = async (imageUrl) => {
+    try {
+        const token = await AsyncStorage.getItem("Token");
+        if (!token) return;
+        const api = await axiosInstance();
+        const response = await api.post(`/api/data/user/uploadprofile`, {
+            imageUrl: imageUrl,
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        });
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            return Promise.reject(error.response.data);
+        }
+        return Promise.reject({ message: error.message || "Something went wrong" });
+    }
+}

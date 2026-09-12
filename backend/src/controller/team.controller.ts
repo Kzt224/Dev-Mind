@@ -119,8 +119,8 @@ export class TeamController {
     sentMemberToFeedBack = async (req: RequestwithUser, res: Response): Promise<Response> => {
         const userId = req.user?.userId;
         try {
-            const { requestId, status, info }: RequestData = req.body;
-            const result = await this.TeamServices.sentMemberToFeedBack(userId, requestId, status, info, req.app.get("io"));
+            const { requestId, status }: RequestData = req.body;
+            const result = await this.TeamServices.sentMemberToFeedBack(userId, requestId, status, req.app.get("io"));
             return res.status(result.status).json(result.json);
         } catch (error) {
             logger.error("TeamController.userConnectWithInviteLink failed!", {

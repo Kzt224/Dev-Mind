@@ -3,6 +3,7 @@ import { SendNotification } from "../controller/notiAutoMation.controller.js";
 import { logger } from "../libs/LogGenerator.js";
 import { v4 as uuidv4 } from 'uuid';
 import { NotificationService } from "./notificationService.js";
+import { notiData } from "../dto/notiData.dto.js";
 
 interface ReturnGroup {
     id: number;
@@ -22,13 +23,7 @@ class groupLeftRequest {
     groupId!: number;
     requestUserName!: string
 }
-interface notiData {
-    header: string,
-    body: string,
-    authorId: number,
-    info?: string,
-    type: any
-}
+
 
 interface NotificationPayload {
     receiverId: number;
@@ -216,7 +211,7 @@ export class TeamService {
 
             const currentTime = new Date();
             let joinRequest = await this.prisma.joinRequest.findUnique({
-                where: { groupId_userId: { groupId: invitation.groupId, userId: Number(userId) } },
+                where: { groupId_userId_info: { groupId: invitation.groupId, userId: Number(userId), info: "JOIN" } },
             });
             if (joinRequest) {
                 if (joinRequest.joinStatus === "PENDING" && joinRequest.retryAt && currentTime < joinRequest.retryAt) {
@@ -362,12 +357,15 @@ export class TeamService {
                 select: { ownerId: true }
             })
             if (!groupAdmin) {
-                return;
+                return {
+                    status: 404,
+                    json: { message: "Group admin not found" }
+                }
             }
-            await this.prisma.joinRequest.create({
+            const requestResult = await this.prisma.joinRequest.create({
                 data: {
-                    groupId,
-                    userId,
+                    groupId: groupId,
+                    userId: userId,
                     info: 'LEFT',
                     joinStatus: "PENDING"
                 }
@@ -376,8 +374,8 @@ export class TeamService {
                 header: `Alert user ${reqUserName} was reqest to leave group`,
                 body: "I wanna left from group so my assign task to take back",
                 authorId: groupAdmin?.ownerId,
-                info: "LEFT",
-                type: "REQUEST"
+                type: "REQUEST",
+                requestId: requestResult.id,
             }
             const noti = new NotificationService();
             await noti.createAndEmitNotification(adminNoti, io);
@@ -404,18 +402,30 @@ export class TeamService {
                         where: { id: joinRequest?.groupId },
                         select: { ownerId: true }
                     })
-                    await tx.task.updateMany({
+                    const task = await tx.task.findFirst({
                         where: {
-                            groupId: joinRequest.groupId,
-                            assignedUserId: joinRequest.userId,
-                            status: {
-                                not: "DONE",
+                            authorId: admin?.ownerId,
+                            assignTo: {
+                                assignedUserId: joinRequest.userId
                             },
-                        },
+                            status: {
+                                not: "DONE"
+                            }
+                        }
+                    })
+                    if (!task) {
+                        throw new Error("Task not found");
+                    }
+
+                    if (!task.assignId) {
+                        throw new Error("Task has no assignment");
+                    }
+                    await tx.assignTrack.update({
+                        where: { id: task?.assignId },
                         data: {
-                            assignedUserId: admin?.ownerId,
-                        },
-                    });
+                            assignedUserId: admin?.ownerId
+                        }
+                    })
                     await tx.groupMember.delete({
                         where: {
                             groupId_userId: {
@@ -433,18 +443,24 @@ export class TeamService {
                         }
                     });
                 });
-                const leftNoti: notiData = {
-                    header: `Alert!`,
-                    body: "You was successfully left from grup.",
-                    authorId: joinRequest.userId,
-                    info: "LEFT",
-                    type: "ALERT"
-                }
-                const noti = new NotificationService()
-                await noti.createAndEmitNotification(leftNoti, io);
             }
+            const leftNoti: notiData = {
+                header: `Alert!`,
+                body: `You have been ${status === "ACCEPTED" ? "accepted" : "rejected"} to left the group`,
+                authorId: joinRequest.userId,
+                type: "ALERT",
+            }
+            const noti = new NotificationService()
+            await noti.createAndEmitNotification(leftNoti, io);
         } catch (error) {
-
+            logger.error("TeamService.handleAcceptedLeftGroup failed!", {
+                userId: requestId,
+                error: error
+            });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            }
         }
     }
     async handleAcceptedJoinGroup(requestId: number, joinRequest: any, status: string, io: any) {
@@ -478,17 +494,16 @@ export class TeamService {
             }
         }
     }
-    async sentMemberToFeedBack(userId: number, requestId: number, status: JoinStatus, info: string, io: any) {
+    async sentMemberToFeedBack(userId: number, requestId: number, status: JoinStatus, io: any) {
         try {
             if (!requestId || !status) return { status: 400, json: { message: "Invalid request data" } };
-
             const joinRequest = await this.prisma.joinRequest.findUnique({ where: { id: Number(requestId) } });
             if (!joinRequest) return { status: 404, json: { message: "Join request not found" } };
             if (joinRequest.joinStatus === status) {
                 return { status: 200, json: { message: "Status already updated" } };
             }
             await this.prisma.joinRequest.update({ where: { id: joinRequest.id }, data: { joinStatus: status, retryAt: null } });
-            if (info === "JOIN") {
+            if (joinRequest.info === "JOIN") {
                 await this.handleAcceptedJoinGroup(requestId, joinRequest, status, io)
             } else {
                 await this.handleAcceptLeftGroup(requestId, joinRequest, status, io)
@@ -531,26 +546,6 @@ export class TeamService {
                     json: { message: "Notification failed" }
                 };
             }
-
-            const socketPayload: SocketEmitPayload = {
-                room: `user_${payload.receiverId}`,
-                event: "notification",
-                data: {
-                    header: notification.header,
-                    body: notification.body,
-                    type: notification.type,
-                    token: payload.token,
-                    requestId: payload.requestId
-                }
-            };
-
-            if (io) {
-                io.to(socketPayload.room).emit(
-                    socketPayload.event,
-                    socketPayload.data
-                );
-            }
-
         } catch (error) {
             console.error("Error sending notification:", error);
         }

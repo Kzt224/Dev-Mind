@@ -1,6 +1,6 @@
 import { PrismaClient } from "../../../generated/prisma/index.js";
 import { TaskService } from "../../services/taskServies.js"
-import { createOllamaClient } from "../chat/user.chat.js";
+import { createOllamaClient } from "../vendor/ollama.js";
 
 interface summeryInterface {
     hithPriorityList: number;
@@ -53,7 +53,7 @@ export class AiInsight {
     private generateAIInsight = async () => {
         const prompt = await this.getPrompt();
         const ollama = createOllamaClient();
-        const response = await ollama.chat({
+        const response = await (await ollama).chat({
             model: "gpt-oss:120b-cloud",
             messages: [
                 {

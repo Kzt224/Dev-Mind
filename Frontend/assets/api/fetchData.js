@@ -355,7 +355,6 @@ export const sendGroupJoinFeekback = async (data) => {
             {
                 requestId: data?.requestId,
                 status: data?.status,
-                info: data?.info
             },
             {
                 headers: {

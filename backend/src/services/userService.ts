@@ -1,6 +1,8 @@
 import { PrismaClient } from "../../generated/prisma/index.js";
 import UserNoti from "../controller/userNoti/updateUserInfoNoti.js";
+import cloudinary from "../libs/cloudinary.cfg.js";
 import { encryptPassword } from "../libs/hashpassword.js";
+import { logger } from "../libs/LogGenerator.js";
 
 interface User {
     email: string;
@@ -24,6 +26,7 @@ export class UserService {
                     email: result.email,
                     phone: result.phone,
                     userName: result.userName,
+                    profilePicture: result.profilePicture
                 },
             },
         };
@@ -65,5 +68,71 @@ export class UserService {
         await noti.updatePasswordNoti();
 
         return { status: 200, json: { message: "Password updated successfully" } };
+    }
+    async getSignature(userId: number) {
+        try {
+            const timestamp = Math.floor(Date.now() / 1000);
+            const folder = "DevMind/user_profile";
+            const apiSecret = process.env.CLOUDINARY_API_SECRECT;
+            const apiKey = process.env.CLOUDINARY_API_KEY;
+            const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+            if (!apiSecret || !apiKey || !cloudName) {
+                throw new Error("Missing Cloudinary environment variables on backend.");
+            }
+            const paramToSign = {
+                folder: folder,
+                timestamp: timestamp,
+            };
+
+            const signature = cloudinary.utils.api_sign_request(
+                paramToSign,
+                apiSecret || ""
+            );
+
+            return {
+                status: 200,
+                json: {
+                    signature,
+                    timestamp,
+                    apiKey: apiKey,
+                    cloudName: cloudName,
+                    folder,
+                }
+            };
+        } catch (error) {
+            logger.error("UserService.getSignature failed!", { userId, error });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            };
+        }
+    }
+    async uploadProfile(imageUrl: string, userId: number) {
+        try {
+            if (!imageUrl) {
+                return {
+                    status: 400,
+                    json: { message: "Image url is required" }
+                }
+            }
+            await this.prisma.user.update({
+                where: {
+                    id: userId
+                },
+                data: {
+                    profilePicture: imageUrl
+                }
+            })
+            return {
+                status: 200,
+                json: { message: "Profile uploaded successfully!" }
+            }
+        } catch (error) {
+            logger.error("UserService.uploadProfile failed!", { userId, error });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            };
+        }
     }
 }

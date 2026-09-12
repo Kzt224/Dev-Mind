@@ -18,6 +18,8 @@ import { useAlertStore } from "@/assets/store/aleartStore.js";
 import AssignForm from "./AssignForm.jsx";
 import InsightDisplayForm from "./InsightDisplayForm.jsx";
 import GroupLeftForm from "./GroupLeftForm.jsx";
+
+
 export default function PopupInput() {
     const { isVisible, closeModal,
         modalType, inputData, editProject,
@@ -141,9 +143,9 @@ export default function PopupInput() {
         },
         forGroupLeft: {
             buildData: (inputData) => ({
-                userName: inputData['User Name'],
-                userId: inputData["User Id"],
-                groupId: inputData['group'].groupId
+                userName: inputData['User Name'] ?? inputData['group'].userName,
+                userId: inputData["User Id"] ?? inputData['group'].userId,
+                groupId: inputData['group'].groupId ?? inputData['group'].groupId
             }),
             validate: (data) => data.groupId && data.userId,
             mutate: groupLeftRequest,
@@ -184,7 +186,7 @@ export default function PopupInput() {
         }
         let isValid = true;
         if (step == 2) {
-            isValid = handler.validate(data, editTask);
+            isValid = handler.validate(data);
         }
         if (!isValid) {
             Alert.alert("Warning", "Please fill in all fields correctly");

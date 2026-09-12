@@ -1,44 +1,101 @@
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { customCard } from "@/assets/themes/style.js";
+import { Image, Pressable, ScrollView, StyleSheet, Text, Animated, Easing, View } from "react-native";
 import { Colors } from "@/assets/mainColor/colors.js";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../hook/authContex";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { settingList } from "@/assets/helper/settingList";
-import { useRouter } from "expo-router";
-import { useNavBarHeight } from "../hook/navHeighContex";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./card/loading";
 import { getUserById } from "@/assets/api/fetchUser.js";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LanguageContext } from "../hook/languageContex";
+import * as ImagePicker from "expo-image-picker";
+import { imageUploader } from "../../assets/libs/imageUploader.js";
+import useProfileMutation from "../hook/profileMutation.jsx";
+import { LinearGradient } from "expo-linear-gradient";
+import Error from "./card/error.jsx";
+import SettingList from "./setting/settingList.jsx";
+import ImageView from "react-native-image-viewing"
+import { compressImage } from "../../assets/helper/compressImage.js";
+
 
 export default function Account() {
 
-  const { user, logout } = useContext(AuthContext);
-  const { NavBarHeight } = useNavBarHeight();
-  const { t } = useContext(LanguageContext);
-  const router = useRouter();
-  const { data: account, isLoading, isError } = useQuery({
+  const { user } = useContext(AuthContext);
+  const rotateAnim = useState(new Animated.Value(0))[0];
+  const [uploading, setUploading] = useState(false);
+  const [image, setImage] = useState(null);
+  const [visable, setVisable] = useState(false);
+  const { mutate: uploadProfile, isPending } = useProfileMutation();
+  const { data: account, isLoading, isError, refetch } = useQuery({
     queryKey: ['userInfo', user?.id],
     queryFn: () => getUserById(user?.id),
     enabled: !!user?.id
   });
-  const profile = account?.user;
-  const handleNavigate = (link) => {
-    if (!link) return;
-    if (link === 'logout') {
-      logout();
-    } else {
-      router.push({
-        pathname: `/components/setting/${link}`,
-        params: { id: user?.id || 0 }
+  useEffect(() => {
+    if (account) {
+      setImage(account?.user?.profilePicture)
+    }
+  }, [])
+  useEffect(() => {
+
+    if (!isPending) {
+      rotateAnim.stopAnimation();
+      rotateAnim.setValue(0);
+      return;
+    }
+
+    const animation = Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 1500,
+        easing: Easing.linear,
+        useNativeDriver: true,
       })
+    );
+
+    animation.start();
+
+    return () => {
+      animation.stop();
+    };
+  }, [isPending, uploading]);
+
+  const rotate = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+  const profile = account?.user;
+  const handlePickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission) {
+      Alert.alert('Permission required', 'Permission to access the media library is required.');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1
+    })
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri)
+      setUploading(true);
+      const compressed = await compressImage(result.assets[0].uri);
+      const response = await imageUploader(compressed);
+      setUploading(false);
+      if (response) {
+        uploadProfile(response);
+      }
     }
   }
+  if (isError) {
+    return (
+      <Error fn={refetch} />
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, padding: 15, backgroundColor: Colors.bgPrimary }}>
@@ -48,13 +105,45 @@ export default function Account() {
           {/* profile image box */}
           <View style={styles.ppImageContainer}>
             <View style={styles.imgContainer}>
-              <View style={styles.img}>
-                <Text style={{ color: Colors.white, fontSize: 27, fontWeight: "bold" }}>
-                  {profile?.name.slice(0, 1).toUpperCase()}
-                </Text>
+              {(isPending || uploading) && (
+                <Animated.View
+                  style={[
+                    styles.gradientAnimated,
+                    {
+                      transform: [{ rotate }],
+                    },
+                  ]}
+                >
+                  <LinearGradient
+                    colors={["#9f744c", "#5a983b", "#6a3419"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.gradientBorderWrapper}
+                  />
+                </Animated.View>
+              )}
+              <View style={[styles.img]}>
+                {image ?
+                  (
+                    <>
+                      <Pressable onPress={() => setVisable(true)}>
+                        <Image source={{ uri: image }} style={{ width: 95, height: 95, borderRadius: 50 }} />
+                      </Pressable>
+                      <ImageView
+                        images={[{ uri: image }]}
+                        visible={visable}
+                        onRequestClose={() => setVisable(false)}
+                        imageIndex={0} />
+                    </>
+                  )
+                  : (
+                    <Text style={{ color: Colors.white, fontSize: 27, fontWeight: "bold" }}>
+                      {profile?.name.slice(0, 1).toUpperCase()}
+                    </Text>
+                  )}
               </View>
               {/* upload button */}
-              <Pressable style={{
+              <Pressable onPress={handlePickImage} style={{
                 position: "absolute",
                 bottom: 6,
                 right: 16,
@@ -98,28 +187,25 @@ export default function Account() {
             </View>
           </View>
           {/* user detail and setting */}
-          <View style={[{ paddingHorizontal: 15, paddingBottom: 15 }, customCard['cardNormal']]}>
-            {settingList?.map((i) => (
-              <Pressable onPress={() => handleNavigate(i?.link)} style={styles.list} key={i.id}>
-                <View style={[styles.icon, {
-                  backgroundColor: Colors[i?.bg],
-                }]}>
-                  <MaterialIcons name={i?.icon} size={30} color={Colors[i?.color]} />
-                </View>
-                <View style={styles.listText}>
-                  <Text style={{ color: Colors.textPrimary, fontWeight: "bold" }}>{t[i?.name]}</Text>
-                  <Text style={{ color: Colors.textSecondary, fontSize: 13 }}>{i?.description}</Text>
-                </View>
-              </Pressable>
-            ))}
-          </View>
+          <SettingList />
         </ScrollView>
       </SafeAreaView>
-    </SafeAreaProvider>
+    </SafeAreaProvider >
   );
 }
 
 const styles = StyleSheet.create({
+  gradientAnimated: {
+    position: "absolute",
+    width: 104,
+    height: 104,
+    borderRadius: 55,
+  },
+  gradientBorderWrapper: {
+    width: 104,
+    height: 104,
+    borderRadius: 55,
+  },
   ppImageContainer: {
     display: "flex",
     flexDirection: "column",
@@ -146,23 +232,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center"
   },
-  list: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 25,
-    marginTop: 20
-  },
-  icon: {
-    width: 40,
-    height: 40,
-    borderRadius: 7,
-    alignItems: "center",
-    justifyContent: 'center'
-  },
-  listText: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "flex-start"
-  }
 })

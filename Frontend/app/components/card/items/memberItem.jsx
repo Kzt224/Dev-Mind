@@ -35,7 +35,13 @@ export default function MemberItem({ member, currUser, permission }) {
     }
     const handleGroupLeft = (item) => {
         openModal("forGroupLeft", item?.id);
-        setInputData("group", item);
+        const groupData = {
+            groupId: item.groupId,
+            role: item?.role,
+            userName: item?.user?.name,
+            userId: item?.user?.id
+        }
+        setInputData("group", groupData);
     }
 
     const getActionButtons = () => {
