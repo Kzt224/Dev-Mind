@@ -10,6 +10,7 @@ import notiRoute from "./routes/noti.route.js";
 import groupRoute from "./routes/team.route.js";
 import assignRoute from "./routes/assignTask.route.js";
 import userRoute from "./routes/user.route.js";
+import testRoute from "./routes/test.route.js";
 import { createServer } from "http";
 import cors from "cors";
 import { Server as SocketIOServer } from "socket.io";
@@ -21,7 +22,7 @@ import { decodeToken } from "./libs/jwt.js";
 const app = express();
 dotenv.config();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors({
     origin: true,
@@ -56,6 +57,7 @@ app.use("/api/data", groupRoute);
 app.use("/api/data", assignRoute);
 app.use("/api/data", userRoute);
 app.use("/", configRoute);
+app.use("/test", testRoute)
 
 const onlineUser = new Map<number, Set<string>>();
 const disconnectTimers = new Map<number, NodeJS.Timeout>();
