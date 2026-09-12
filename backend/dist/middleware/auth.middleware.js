@@ -1,0 +1,21 @@
+import { decodeToken } from "../libs/jwt.js";
+export const checkAuth = async (req, res, next) => {
+    try {
+        const header = req.headers.authorization;
+        if (!header) {
+            res.status(401).json({ message: "No token" });
+            return;
+        }
+        const token = header.split(" ")[1];
+        const decode = await decodeToken(token);
+        if (!decode) {
+            res.status(401).json({ message: "Invalid token" });
+            return;
+        }
+        req.user = decode;
+        next();
+    }
+    catch (error) {
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
