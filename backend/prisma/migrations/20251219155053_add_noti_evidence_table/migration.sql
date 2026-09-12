@@ -1,8 +1,0 @@
--- CreateTable
-CREATE TABLE "NotiEvidence" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "authorId" INTEGER NOT NULL,
-    "notiToken" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "NotiEvidence_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
-);
