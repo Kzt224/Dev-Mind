@@ -43,7 +43,7 @@ export class AiInsight {
                 - No bullet points
                 - No quotation marks
                 - Focus on productivity or urgency
-
+                - If No summary just response relatedd content
                 Task Summary:
                 ${JSON.stringify(this.summery)}
                 `;
