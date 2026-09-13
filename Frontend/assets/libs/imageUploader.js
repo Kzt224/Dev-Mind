@@ -16,7 +16,13 @@ export const imageUploader = async (imageUri) => {
             type: "image/jpeg",
             name: "profile.jpg",
         });
-
+        console.log("CLIENT UPLOAD:", {
+            cloudName,
+            apiKey,
+            folder,
+            timestamp,
+            signature,
+        });
         // Parameters must match backend's paramToSign
         formData.append("api_key", apiKey);
         formData.append("timestamp", String(timestamp));

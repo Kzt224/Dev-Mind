@@ -1,8 +1,8 @@
 import express from 'express';
 
 const router = express.Router();
-router.post("/login", (req, res) => {
-    res.status(200).json({ "message": "application loaded" });
+router.get("/helthcheck", (req, res) => {
+    res.status(200).json({ "message": "Application was loaded successfully" });
 });
 export default router;
 

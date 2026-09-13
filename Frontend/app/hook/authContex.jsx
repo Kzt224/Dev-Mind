@@ -12,6 +12,8 @@ import Error from "../components/card/error";
 import { usePathname, useRouter } from "expo-router";
 import { useAlertStore } from "@/assets/store/aleartStore.js";
 import { createSearchHistoryTable } from "../../assets/db/searchHistory.model";
+import { healthCheck } from "../../assets/api/healthCheck";
+
 export const AuthContext = createContext();
 
 export default function AuthProvider({ children }) {
@@ -32,8 +34,8 @@ export default function AuthProvider({ children }) {
     const initializeApp = async () => {
       try {
         const cfg = await loadConfig();
+        const test = await healthCheck()
         if (cfg) setConfig(cfg);
-
         const initDb = await AsyncStorage.getItem("initDb");
         if (!initDb) {
           await createChatsTable();

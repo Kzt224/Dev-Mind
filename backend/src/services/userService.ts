@@ -88,6 +88,14 @@ export class UserService {
                 paramToSign,
                 apiSecret || ""
             );
+            console.log("CLOUDINARY CONFIG:", {
+                cloudName,
+                apiKey,
+                folder,
+                timestamp,
+            });
+
+            console.log("SIGNATURE:", signature);
 
             return {
                 status: 200,

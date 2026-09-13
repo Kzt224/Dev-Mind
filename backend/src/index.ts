@@ -57,7 +57,7 @@ app.use("/api/data", groupRoute);
 app.use("/api/data", assignRoute);
 app.use("/api/data", userRoute);
 app.use("/", configRoute);
-app.use("/test", testRoute)
+app.use("/", testRoute)
 
 const onlineUser = new Map<number, Set<string>>();
 const disconnectTimers = new Map<number, NodeJS.Timeout>();

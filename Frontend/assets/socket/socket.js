@@ -10,7 +10,6 @@ export const connectSocket = (userId, uri, token) => {
                 autoConnect: true,
                 query: { userId, token },
             });
-
             return socket;
         }
     } catch (error) {

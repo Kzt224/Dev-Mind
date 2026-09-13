@@ -4,18 +4,20 @@ import { initDb } from "./db"
 export const createSearchHistoryTable = async () => {
     try {
         const db = await initDb();
-        await db.execAsync(
-            `CREATE TABLE IF NOT EXISTS searchhistory(
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              content TEXT NOT NULL,
-              userId INTEGER NOT NULL,
-              createdAt INTEGER DEFAULT (strftime('%s','now')),
-            )`
-        );
+
+        await db.execAsync(`
+            CREATE TABLE IF NOT EXISTS searchhistory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                content TEXT NOT NULL,
+                userId INTEGER NOT NULL,
+                createdAt INTEGER DEFAULT (strftime('%s','now'))
+            )
+        `);
+
     } catch (error) {
         console.log("Error creating searchHistory table:", error);
     }
-}
+};
 
 export const getSearchHistory = async (userId) => {
     try {
