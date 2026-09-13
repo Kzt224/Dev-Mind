@@ -10,7 +10,6 @@ export const imageUploader = async (imageUri) => {
             folder,
         } = await getUploadSignature();
         const formData = new FormData();
-        console.log(await getUploadSignature());
         formData.append("file", {
             uri: imageUri,
             type: "image/jpeg",
