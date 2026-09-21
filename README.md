@@ -77,7 +77,10 @@ hooks/
 store/
 assets/
 ```
+## Download App (Version 1.0.01)
 
+- https://expo.dev/accounts/khinzawhtun/projects/AI_MENTOR/builds/e113d612-ff98-4f4b-81d7-1a1a7682cbc5
+  
 ## Learn more
 
 - [Expo documentation](https://docs.expo.dev/)
