@@ -23,9 +23,20 @@ jobs:
       - name: Run Ollama AI reviewer
         env:
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-          OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
+          OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL || 'gpt-oss:120b-cloud' }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BASE_REF: ${{ github.base_ref }}
         run: node scripts/ai-review.mjs
+
+      - name: Upload AI review reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-review-pr-${{ github.event.pull_request.number }}
+          path: |
+            ai-review.md
+            ai-review.json
+          if-no-files-found: ignore
+          retention-days: 30
