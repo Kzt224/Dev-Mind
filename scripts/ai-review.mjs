@@ -3,12 +3,14 @@ import { execFileSync } from "node:child_process";
 
 const {
     OLLAMA_API_KEY,
-    OLLAMA_MODEL = "gpt-oss:120b-cloud",
     GITHUB_TOKEN,
     GITHUB_REPOSITORY,
     PR_NUMBER,
     BASE_REF,
 } = process.env;
+
+const OLLAMA_MODEL =
+    process.env.OLLAMA_MODEL?.trim() || "gpt-oss:120b-cloud";
 
 for (const [name, value] of Object.entries({
     OLLAMA_API_KEY,
