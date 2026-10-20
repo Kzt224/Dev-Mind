@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-//const URL =
-//     "https://raw.githubusercontent.com/Kzt224/Dev-Mind/main/config.json";
-const URL = "http://192.168.1.6:3000/config"
+const URL =
+    "https://raw.githubusercontent.com/Kzt224/Dev-Mind/main/config.json";
+// const URL = "http://192.168.1.6:3000/config"
 
 export const loadConfig = async () => {
     try {
