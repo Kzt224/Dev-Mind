@@ -10,50 +10,130 @@ interface AssignProp {
     userId: number;
     io: any;
 }
+
 export class AssignService {
     private prisma = new PrismaClient();
 
     async assignTask(data: AssignProp): Promise<ResponseDto> {
         const { projectId, taskId, assignUserId, userId, io } = data;
+
         try {
             if (!projectId || !taskId || !assignUserId) {
-                return { status: 400, json: { message: "Require projectId, taskId, and assignUserId" } };
+                return {
+                    status: 400,
+                    json: {
+                        message: "Require projectId, taskId, and assignUserId"
+                    }
+                };
             }
-            const task = await this.prisma.task.findUnique({ where: { id: Number(taskId) } });
-            if (!task) return { status: 404, json: { message: "Task not found" } };
 
-            if (task.assignId) {
-                return { status: 400, json: { message: "This task is already assigned" } };
+            const task = await this.prisma.task.findUnique({
+                where: { id: Number(taskId) },
+                include: {
+                    assignTo: true,
+                }
+            });
+
+            if (!task) {
+                return {
+                    status: 404,
+                    json: { message: "Task not found" }
+                };
+            }
+
+            if (task.assignTo?.assigneeId && task.assignTo.assigneeId !== task.authorId) {
+                return {
+                    status: 400,
+                    json: { message: "This task is already assigned" }
+                };
             }
 
             if (task.authorId !== Number(userId)) {
-                return { status: 400, json: { message: "Admin only can assign" } };
+                return {
+                    status: 400,
+                    json: { message: "Admin only can assign" }
+                };
             }
 
             if (task.status === "DONE") {
-                return { status: 400, json: { message: "This task is already done, can't assign" } };
+                return {
+                    status: 400,
+                    json: {
+                        message: "This task is already done, can't assign"
+                    }
+                };
             }
-            const project = await this.prisma.project.findUnique({ where: { id: Number(projectId) }, select: { name: true } });
-            if (!project) return { status: 404, json: { message: "Project not found" } };
+
+            // Check if this assignee already has an unfinished task
+            // from the same author
+            const existingAssignment = await this.prisma.assignTrack.findFirst({
+                where: {
+                    assigneeId: Number(assignUserId),
+                    assignedUserId: Number(userId),
+                    task: {
+                        status: {
+                            not: "DONE"
+                        }
+                    }
+                }
+            });
+
+            if (existingAssignment) {
+                return {
+                    status: 400,
+                    json: {
+                        message: "This user is already assigned to an unfinished task"
+                    }
+                };
+            }
+
+            const project = await this.prisma.project.findUnique({
+                where: { id: Number(projectId) },
+                select: { name: true }
+            });
+
+            if (!project) {
+                return {
+                    status: 404,
+                    json: { message: "Project not found" }
+                };
+            }
 
             await this.prisma.$transaction(async (tx) => {
                 const created = await tx.assignTrack.create({
                     data: {
-                        project: { connect: { id: Number(projectId) } },
-                        task: { connect: { id: Number(taskId) } },
-                        assignUser: { connect: { id: Number(assignUserId) } },
+                        project: {
+                            connect: { id: Number(projectId) }
+                        },
+                        task: {
+                            connect: { id: Number(taskId) }
+                        },
+
+                        // The user who receives the task
+                        assignee: {
+                            connect: { id: Number(assignUserId) }
+                        },
+
+                        // The user who got assigns the task
+                        assignUser: {
+                            connect: { id: Number(userId) }
+                        }
                     }
                 });
+
                 await tx.task.update({
                     where: { id: Number(taskId) },
                     data: {
-                        assignId: Number(created?.id),
+                        assignId: Number(created.id)
                     }
-                })
-            })
+                });
+            });
 
             try {
-                const noti = new SendNotification({ socketIo: io });
+                const noti = new SendNotification({
+                    socketIo: io
+                });
+
                 await noti.sendAssignNoti({
                     memberId: assignUserId,
                     authorId: userId,
@@ -64,19 +144,26 @@ export class AssignService {
             } catch (error) {
                 console.error("Error sending notification:", error);
             }
+
             return {
                 status: 200,
-                json: { "message": `Assign task to ${userId} successfully` }
-            }
+                json: {
+                    message: `Assign task to ${userId} successfully`
+                }
+            };
+
         } catch (error) {
             logger.error("TeamService.userConntectWithInviteLink failed!", {
                 userId: userId,
-                error: error
+                error
             });
+
             return {
                 status: 500,
-                json: { message: "Internal server error" }
-            }
+                json: {
+                    message: "Internal server error"
+                }
+            };
         }
     }
 }

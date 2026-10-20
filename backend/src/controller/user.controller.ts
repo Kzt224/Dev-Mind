@@ -18,6 +18,16 @@ export class UserController {
             return res.status(500).json({ message: "Internal server error" });
         }
     }
+    getCollaboratorProfile = async (req: RequestwithUser, res: Response, collaboratorId: number): Promise<Response> => {
+        try {
+            const userId = req?.user?.userId || 0;
+            const result = await this.userService.fetchCollaboratorProfile(userId, collaboratorId);
+            return res.status(result.status).json(result.json);
+        } catch (error) {
+            console.log("error on getCollaboratorProfile", error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
     updateUserInfo = async (req: RequestwithUser, res: Response): Promise<Response> => {
         try {
             const userId = req.user?.userId || 0;

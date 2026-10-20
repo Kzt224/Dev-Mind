@@ -56,7 +56,7 @@ export class TaskService {
                 where: {
                     OR: [
                         { authorId: userId },
-                        { assignTo: { assignedUserId: userId } },
+                        { assignTo: { assigneeId: userId } },
                     ],
                 },
                 include: {
@@ -96,12 +96,12 @@ export class TaskService {
                             authorId: true,
                         }
                     },
-                    assignTo: { select: { assignUser: { select: { name: true, id: true } } } },
+                    assignTo: { select: { assignee: { select: { name: true, id: true } } } },
                 },
             });
             const isProjectOwner = task?.project?.authorId === authorId;
             const taskOwner = task?.authorId === authorId;
-            const assignee = task?.assignTo?.assignUser?.id === authorId;
+            const assignee = task?.assignTo?.assignee?.id === authorId;
             if (!task) {
                 return { status: 404, json: { message: "Task not found!" } };
             }
@@ -122,8 +122,8 @@ export class TaskService {
                 note: task.note,
                 progress: task.progress,
                 project: task.project,
-                assignTo: task.assignTo?.assignUser?.name || null,
-                assignToId: task?.assignTo?.assignUser?.id || null,
+                assignTo: task.assignTo?.assignee?.name || null,
+                assignToId: task?.assignTo?.assignee?.id || null,
                 author: task?.author || null
             };
 
@@ -343,6 +343,11 @@ export class TaskService {
                 include: {
                     project: {
                         select: { authorId: true }
+                    },
+                    assignTo: {
+                        include: {
+                            assignee: true
+                        }
                     }
                 }
             });
@@ -351,6 +356,13 @@ export class TaskService {
                 return { status: 404, json: { message: "Task not found" } };
             }
             const isOwner = task.project.authorId === authorId;
+
+            if (!isOwner && task.assignTo?.assigneeId !== authorId) {
+                return {
+                    status: 403,
+                    json: { message: "You have no permission for update task" }
+                }
+            }
             let result: ResponseDto;
             if (isOwner) {
                 result = await this.modifyTaskByOwner(data, task, authorId, id);
@@ -382,7 +394,7 @@ export class TaskService {
             const notiService = new SendNotification({ socketIo: io });
             const editorId = Number(authorId);
             const assignTrack = task.assignId ? await this.prisma.assignTrack.findUnique({ where: { id: Number(task.assignId) } }) : null;
-            const assignedUserId = assignTrack?.assignedUserId;
+            const assignedUserId = assignTrack?.assigneeId;
             if (editorId === task.authorId && assignedUserId) {
                 await this.emitNoti(io, notiService, assignedUserId, editorId, updateTask, task.projectId);
             }

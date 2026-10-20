@@ -218,7 +218,7 @@ export class TeamService {
                     const minutes = Math.ceil((joinRequest.retryAt.getTime() - currentTime.getTime()) / 60000);
                     return { status: 400, json: { message: `${minutes} min cooldown. Please wait.` } };
                 }
-                if (joinRequest.joinStatus === "ACCEPTED") {
+                if (joinRequest.info === "JOIN" && joinRequest.joinStatus === "ACCEPTED") {
                     return { status: 400, json: { message: "You have already join this group" } };
                 }
 
@@ -362,15 +362,20 @@ export class TeamService {
                     json: { message: "Group admin not found" }
                 }
             }
-            const requestResult = await this.prisma.joinRequest.create({
+            const requestResult = await this.prisma.joinRequest.update({
+                where: {
+                    groupId_userId_info: {
+                        groupId: groupId,
+                        userId: userId,
+                        info: "JOIN"
+                    },
+                },
                 data: {
-                    groupId: groupId,
-                    userId: userId,
-                    info: 'LEFT',
+                    info: "LEFT",
                     joinStatus: "PENDING"
                 }
-            });
-            const adminNoti: notiData = {
+            })
+            const userNoti: notiData = {
                 header: `Alert user ${reqUserName} was reqest to leave group`,
                 body: "I wanna left from group so my assign task to take back",
                 authorId: groupAdmin?.ownerId,
@@ -378,7 +383,7 @@ export class TeamService {
                 requestId: requestResult.id,
             }
             const noti = new NotificationService();
-            await noti.createAndEmitNotification(adminNoti, io);
+            await noti.createAndEmitNotification(userNoti, io);
             return {
                 status: 200,
                 json: { message: "You was request to left group successsully" }
@@ -406,7 +411,7 @@ export class TeamService {
                         where: {
                             authorId: admin?.ownerId,
                             assignTo: {
-                                assignedUserId: joinRequest.userId
+                                assigneeId: joinRequest.userId
                             },
                             status: {
                                 not: "DONE"
@@ -423,7 +428,7 @@ export class TeamService {
                     await tx.assignTrack.update({
                         where: { id: task?.assignId },
                         data: {
-                            assignedUserId: admin?.ownerId
+                            assigneeId: admin?.ownerId
                         }
                     })
                     await tx.groupMember.delete({
@@ -434,6 +439,14 @@ export class TeamService {
                             }
                         }
                     });
+                    await tx.notification.updateMany({
+                        where: {
+                            requestId: requestId
+                        },
+                        data: {
+                            isAction: true
+                        }
+                    })
                     await tx.joinRequest.update({
                         where: {
                             id: requestId
