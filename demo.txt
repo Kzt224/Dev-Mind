@@ -1,0 +1,9 @@
+const oldDb = "AssignTrack"
+const newDb = "AssignTracNew"
+
+oldDb->assignedUserId = newDb->assignee
+
+Select assignedUserId as accpter from oldDb left join newDb where newDb.id = oldDb.id 
+
+Update assignee set accepter where newDb.id = oldDb.id
+

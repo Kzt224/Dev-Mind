@@ -19,7 +19,7 @@ export class ProjectService {
                             tasks: {
                                 some: {
                                     assignTo: {
-                                        assignedUserId: id,
+                                        assigneeId: id,
                                     },
                                 },
                             },
@@ -71,7 +71,7 @@ export class ProjectService {
                         include: {
                             assignTo: {
                                 include: {
-                                    assignUser: {
+                                    assignee: {
                                         select: { name: true, id: true }
                                     }
                                 }
@@ -85,7 +85,6 @@ export class ProjectService {
                     },
                 },
             });
-
             if (!project) {
                 return {
                     status: 404,
@@ -103,7 +102,7 @@ export class ProjectService {
 
             const tasksWithPermission = project.tasks.map((task) => {
                 const isTaskOwner = task?.authorId === userId;
-                const assignee = task?.assignTo?.assignedUserId === userId;
+                const assignee = task?.assignTo?.assigneeId === userId;
                 return {
                     ...task,
                     permission: {
@@ -189,8 +188,10 @@ export class ProjectService {
         try {
             const existing = await this.prisma.project.findFirst({
                 where: {
-                    id: pid,
-                    authorId: authorId
+                    OR: [
+                        { id: id },
+                        { authorId: authorId }
+                    ]
                 }
             });
 
@@ -234,7 +235,12 @@ export class ProjectService {
 
             // duration is calculated by days
             endDate.setDate(endDate.getDate() + Number(duration));
-
+            if (authorId !== existing.authorId) {
+                return {
+                    status: 403,
+                    json: { message: "You have no permission for update project" }
+                }
+            }
             await this.prisma.project.update({
                 where: { id: pid },
                 data: {

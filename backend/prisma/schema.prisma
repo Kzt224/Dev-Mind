@@ -27,7 +27,8 @@ model User {
   inviters          Invitation[]     @relation("leader")
   groups           Group[]
   members          GroupMember[]
-  assignTracks     AssignTrack[]
+  taskAssignees AssignTrack[]     @relation("taskAssignee")
+  assignTracks     AssignTrack[]    @relation("taskAssignedBy")
   modTracks        ModTracker[]
   aiInsight        AiInsight[]
   assignedUsers    User[]            @relation("UserAssignment")
@@ -99,7 +100,9 @@ model AssignTrack {
     id               Int          @id @default(autoincrement())
     task             Task?        @relation("taskAssign")
     project          Project?     @relation("projectAssign")
-    assignUser       User         @relation(fields: [assignedUserId],references: [id])
+    assignee   User @relation("taskAssignee", fields: [assigneeId], references: [id])
+    assigneeId Int
+    assignUser       User         @relation("taskAssignedBy",fields: [assignedUserId],references: [id])
     assignedUserId   Int
     assignedAt       DateTime     @default(now())
     createdAt        DateTime     @default(now())

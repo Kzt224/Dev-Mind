@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "Dev Mind",
+    "slug": "AI_MENTOR",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/images/bgImages/applogo.png",
+    "scheme": "aimentor",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "softwareKeyboardLayoutMode": "resize",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/bgImages/applogo.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.khinzawhtun.AI_MENTOR"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/bgImages/image.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/bgImages/applogo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ],
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d1e37ff6-0c34-4cd0-bf51-1d9a75436eef"
+      }
+    }
+  }
+}

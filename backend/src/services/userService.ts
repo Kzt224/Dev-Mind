@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../generated/prisma/index.js";
+import { PrismaClient, Status } from "../../generated/prisma/index.js";
 import UserNoti from "../controller/userNoti/updateUserInfoNoti.js";
 import cloudinary from "../libs/cloudinary.cfg.js";
 import { encryptPassword } from "../libs/hashpassword.js";
@@ -31,6 +31,20 @@ export class UserService {
             },
         };
     }
+    async fetchCollaboratorProfile(userId: number, collaboratorId: number) {
+        try {
+            return {
+                status: 200,
+                json: { message: "Internal server error" }
+            }
+        } catch (error) {
+            logger.error("UserService.getSignature failed!", { userId, error });
+            return {
+                status: 500,
+                json: { message: "Internal server error" }
+            };
+        }
+    }
     async updateUser(id: number, data: User, io: any) {
         const { email, phone, userName, name } = data;
         if (!email && !phone && !userName && !name) {
@@ -43,7 +57,6 @@ export class UserService {
                 return { status: 400, json: { message: "Email already in use by another account" } };
             }
         }
-
         const result = await this.prisma.user.update({
             where: { id: Number(id) },
             data: { email, phone, userName, name },
